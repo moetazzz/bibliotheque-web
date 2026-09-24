@@ -27,21 +27,18 @@
                th:classappend="${active == 'amendes'} ? 'active'">
                 <i>💰</i> Amendes
             </a>
-            <a href="/utilisateurs" class="nav-link"
-               th:classappend="${active == 'utilisateurs'} ? 'active'"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">
-                <i>👥</i> Utilisateurs
-            </a>
-            <a href="/dashboard" class="nav-link"
-               th:classappend="${active == 'dashboard'} ? 'active'"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">
-                <i>📊</i> Dashboard
-            </a>
-            <a href="/journal" class="nav-link"
-               th:classappend="${active == 'journal'} ? 'active'"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">
-                <i>📜</i> Journal
-            </a>
+
+            <!-- Menu Admin dropdown -->
+            <div class="dropdown" th:if="${#authorization.expression('hasRole(''BIB'')')}">
+                <button class="nav-link dropdown-toggle">
+                    <i>⚙️</i> Admin
+                </button>
+                <div class="dropdown-menu">
+                    <a href="/dashboard" class="dropdown-item">📊 Dashboard</a>
+                    <a href="/utilisateurs" class="dropdown-item">👥 Utilisateurs</a>
+                    <a href="/journal" class="dropdown-item">📜 Journal d'audit</a>
+                </div>
+            </div>
         </div>
 
         <div class="navbar-right">
