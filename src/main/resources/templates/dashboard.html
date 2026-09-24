@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de bord</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .stat-card { transition: transform 0.2s; border-left: 5px solid; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .stat-card.blue { border-color: #0d6efd; }
+        .stat-card.green { border-color: #198754; }
+        .stat-card.orange { border-color: #fd7e14; }
+        .stat-card.red { border-color: #dc3545; }
+        .stat-value { font-size: 2.5rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
+        <div>
+            <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
+            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
+            <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
+            <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
+            <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <a href="/journal" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">📜 Journal</a>
+            <form th:action="@{/logout}" method="post" style="display:inline-block;">
+                <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <h1 class="mb-4">📊 Tableau de bord</h1>
+
+    <!-- Statistiques -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card blue p-3">
+                <div class="stat-value text-primary" th:text="${nbLivres}">0</div>
+                <div class="text-muted">📚 Livres</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card green p-3">
+                <div class="stat-value text-success" th:text="${nbUtilisateurs}">0</div>
+                <div class="text-muted">👥 Utilisateurs</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card orange p-3">
+                <div class="stat-value text-warning" th:text="${nbEmpruntsEnCours}">0</div>
+                <div class="text-muted">📋 Emprunts en cours</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card red p-3">
+                <div class="stat-value text-danger" th:text="${nbAmendesImpayees}">0</div>
+                <div class="text-muted">💰 Amendes impayées</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dernières actions -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">🕵️ Dernières actions</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-sm table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Utilisateur</th>
+                        <th>Action</th>
+                        <th>Détails</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="entry : ${derniersActions}">
+                        <td th:text="${#temporals.format(entry.dateAction, 'dd/MM HH:mm')}">01/01 12:00</td>
+                        <td th:text="${entry.nomUtilisateur}">Alice</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${entry.action.startsWith('AJOUT')} ? 'bg-success' :
+                                                   (${entry.action.startsWith('SUPPR')} ? 'bg-danger' : 'bg-info')"
+                                  th:text="${entry.action}">EMPRUNT</span>
+                        </td>
+                        <td th:text="${entry.details}">—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

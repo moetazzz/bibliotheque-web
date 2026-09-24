@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Amendes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
+        <div>
+            <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
+            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
+            <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
+            <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
+            <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <form th:action="@{/logout}" method="post" style="display:inline-block;">
+                <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <div class="alert alert-success alert-dismissible fade show" th:if="${message}" role="alert">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>💰 <span th:text="${vue == 'BIB'} ? 'Toutes les amendes' : 'Mes amendes'">Amendes</span></h1>
+
+        <!-- Solde du membre -->
+        <div th:if="${vue == 'MEMBRE'}" class="card p-3">
+            <div class="text-center">
+                <div class="h3 mb-0" 
+                     th:classappend="${utilisateur.soldeAmendes > 0} ? 'text-danger' : 'text-success'">
+                    <span th:text="${#numbers.formatDecimal(utilisateur.soldeAmendes, 1, 2)}">0.00</span> €
+                </div>
+                <div class="small text-muted">Solde actuel</div>
+                <form th:action="@{/amendes/payer}" method="post" class="mt-2" 
+                      th:if="${utilisateur.soldeAmendes > 0}">
+                    <button type="submit" class="btn btn-warning btn-sm"
+                            onclick="return confirm('Payer toutes vos amendes ?');">
+                        💳 Payer tout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blocage blacklist -->
+    <div class="alert alert-danger" th:if="${vue == 'MEMBRE' and utilisateur.soldeAmendes >= 10.0}">
+        🚫 <strong>Attention !</strong> Votre solde d'amendes dépasse 10€. Vous ne pouvez plus emprunter de livres.
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th th:if="${vue == 'BIB'}">Utilisateur</th>
+                        <th>Livre</th>
+                        <th>Montant</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="amende : ${amendes}">
+                        <td th:text="${amende.id}">1</td>
+                        <td th:if="${vue == 'BIB'}" th:text="${amende.utilisateur.nom}">Alice</td>
+                        <td th:text="${amende.emprunt.livre.titre}">Titre</td>
+                        <td>
+                            <span class="fw-bold text-danger">
+                                <span th:text="${#numbers.formatDecimal(amende.montant, 1, 2)}">0.00</span> €
+                            </span>
+                        </td>
+                        <td th:text="${#temporals.format(amende.dateCreation, 'dd/MM/yyyy')}">01/01/2026</td>
+                        <td>
+                            <span th:if="${amende.payee}" class="badge bg-success">✅ Payée</span>
+                            <span th:unless="${amende.payee}" class="badge bg-danger">❌ Impayée</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p th:if="${#lists.isEmpty(amendes)}" class="alert alert-info mt-3">
+        📭 Aucune amende à afficher.
+    </p>
+
+</div>
+
+</body>
+</html>

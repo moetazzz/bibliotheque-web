@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des livres</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
+        <div>
+            <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
+            <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
+            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
+            <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
+            <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <form th:action="@{/logout}" method="post" style="display:inline-block;">
+                <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+        <!-- Message flash -->
+    <div class="alert alert-success alert-dismissible fade show" th:if="${message}" role="alert">
+        ✅ <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>📖 Liste des livres</h1>
+        <a href="/livres/nouveau" class="btn btn-success">➕ Ajouter un livre</a>
+    </div>
+
+    <!-- Barre de recherche -->
+    <form method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="recherche" th:value="${recherche}"
+                   class="form-control" placeholder="Rechercher un titre...">
+            <button class="btn btn-primary" type="submit">🔍 Rechercher</button>
+        </div>
+    </form>
+
+    <!-- Tableau des livres -->
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Auteur</th>
+                        <th>Catégorie</th>
+                        <th>Année</th>
+                        <th>ISBN</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="livre : ${livres}">
+                        <td th:text="${livre.id}">1</td>
+                        <td th:text="${livre.titre}">Titre</td>
+                        <td th:text="${livre.auteur}">Auteur</td>
+                        <td>
+                            <span class="badge bg-info" th:text="${livre.categorie}">Catégorie</span>
+                        </td>
+                        <td th:text="${livre.anneePublication}">2026</td>
+                        <td th:text="${livre.isbn}">ISBN</td>
+                        <td class="text-center">
+                            <a th:href="@{/livres/{id}/modifier(id=${livre.id})}" 
+                               class="btn btn-sm btn-warning" title="Modifier">✏️</a>
+                            <form th:action="@{/livres/{id}/supprimer(id=${livre.id})}" 
+                                  method="post" style="display:inline-block;"
+                                  onsubmit="return confirm('Supprimer ce livre ?');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p th:if="${#lists.isEmpty(livres)}" class="alert alert-info mt-3">
+        📭 Aucun livre trouvé.
+    </p>
+
+</div>
+
+</body>
+</html>
