@@ -23,6 +23,10 @@
                th:classappend="${active == 'emprunts'} ? 'active'">
                 <i>📋</i> Emprunts
             </a>
+            <a href="/reservations" class="nav-link"
+               th:classappend="${active == 'reservations'} ? 'active'">
+                <i>📅</i> Réservations
+            </a>
             <a href="/amendes" class="nav-link"
                th:classappend="${active == 'amendes'} ? 'active'">
                 <i>💰</i> Amendes
@@ -66,7 +70,6 @@ function toggleTheme() {
     localStorage.setItem('theme', newTheme);
     document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
 }
-// Charge le thème au démarrage
 (function() {
     const saved = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);

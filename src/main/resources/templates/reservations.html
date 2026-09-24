@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservations</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-main fade-in">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">📅 Réservations</h1>
+            <p class="page-subtitle"
+               th:text="${vue == 'BIB'} ? 'Toutes les réservations actives' : 'Vos réservations en cours'">
+                Réservations
+            </p>
+        </div>
+    </div>
+
+    <div class="alert alert-success" th:if="${message}">
+        <span th:text="${message}"></span>
+    </div>
+    <div class="alert alert-danger" th:if="${erreur}">
+        <span th:text="${erreur}"></span>
+    </div>
+
+    <div class="table-container" th:if="${!#lists.isEmpty(reservations)}">
+        <table class="table-modern">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th th:if="${vue == 'BIB'}">Utilisateur</th>
+                    <th>Livre</th>
+                    <th>Date réservation</th>
+                    <th>Expire le</th>
+                    <th>Statut</th>
+                    <th style="text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="r : ${reservations}">
+                    <td><span class="badge badge-gray" th:text="${r.id}">1</span></td>
+                    <td th:if="${vue == 'BIB'}">
+                        <strong th:text="${r.utilisateur.nom}">Alice</strong>
+                    </td>
+                    <td><strong th:text="${r.livre.titre}">Titre</strong></td>
+                    <td th:text="${#temporals.format(r.dateReservation, 'dd/MM/yyyy')}">01/01/2026</td>
+                    <td th:text="${#temporals.format(r.dateExpiration, 'dd/MM/yyyy')}">08/01/2026</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${r.statut == 'DISPONIBLE'} ? 'badge-success' :
+                                              (${r.statut == 'EN_ATTENTE'} ? 'badge-warning' : 'badge-gray')"
+                              th:text="${r.statutLibelle}">En attente</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <form th:if="${r.estActive()}"
+                              th:action="@{/reservations/{id}/annuler(id=${r.id})}"
+                              method="post" style="display:inline-block;"
+                              onsubmit="return confirm('Annuler cette réservation ?');">
+                            <button type="submit" class="btn btn-warning btn-sm">❌ Annuler</button>
+                        </form>
+                        <form th:if="${vue == 'BIB'}"
+                              th:action="@{/reservations/{id}/supprimer(id=${r.id})}"
+                              method="post" style="display:inline-block;"
+                              onsubmit="return confirm('Supprimer cette réservation ?');">
+                            <button type="submit" class="btn btn-danger btn-icon btn-sm">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(reservations)}">
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3>Aucune réservation</h3>
+            <p th:if="${vue == 'BIB'}">Aucune réservation active pour le moment.</p>
+            <p th:unless="${vue == 'BIB'}">
+                Réservez un livre depuis la page <a href="/livres">Catalogue</a>.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script th:replace="~{fragments/navbar :: themeScript}"></script>
+</body>
+</html>

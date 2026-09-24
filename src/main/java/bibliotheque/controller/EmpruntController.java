@@ -21,6 +21,7 @@ public class EmpruntController {
     @Autowired private LivreService livreService;
     @Autowired private UtilisateurService userService;
     @Autowired private AuditService auditService;
+    @Autowired private ReservationService reservationService;
 
     private boolean estBibliothecaire(Authentication auth) {
         return auth.getAuthorities().stream()
@@ -117,11 +118,15 @@ public class EmpruntController {
                 throw new RuntimeException("Vous ne pouvez retourner que vos propres emprunts");
             }
 
+            Livre livre = emprunt.getLivre();
             emprunt = empruntService.retourner(id);
+
+            // Notifier la prochaine réservation
+            reservationService.notifierRetour(livre);
 
             auditService.enregistrer(emprunt.getUtilisateur().getNom(),
                     emprunt.getUtilisateur().getId(), "RETOUR",
-                    "Livre : " + emprunt.getLivre().getTitre()
+                    "Livre : " + livre.getTitre()
                     + " (retard : " + emprunt.joursDeRetard() + "j)");
 
             String message = emprunt.joursDeRetard() > 0

@@ -2,6 +2,7 @@ package bibliotheque.controller;
 
 import bibliotheque.modele.Livre;
 import bibliotheque.service.AuditService;
+import bibliotheque.service.EmpruntService;
 import bibliotheque.service.LivreService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/livres")
@@ -19,10 +23,23 @@ public class LivreController {
 
     @Autowired private LivreService livreService;
     @Autowired private AuditService auditService;
+    @Autowired private EmpruntService empruntService;
 
     @GetMapping
     public String liste(@RequestParam(required = false) String recherche, Model model) {
-        model.addAttribute("livres", livreService.rechercher(recherche));
+        List<Livre> livres = livreService.rechercher(recherche);
+
+        Map<Long, Boolean> disponibles = new HashMap<>();
+        for (Livre l : livres) {
+            try {
+                disponibles.put(l.getId(), empruntService.estDisponible(l));
+            } catch (Exception e) {
+                disponibles.put(l.getId(), true);
+            }
+        }
+
+        model.addAttribute("livres", livres);
+        model.addAttribute("disponibles", disponibles);
         model.addAttribute("recherche", recherche);
         return "livres";
     }

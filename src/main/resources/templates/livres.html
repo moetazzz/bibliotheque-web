@@ -45,8 +45,11 @@
                     <th>Catégorie</th>
                     <th>Année</th>
                     <th>ISBN</th>
+                    <th style="text-align: center;">Disponibilité</th>
                     <th style="text-align: center;"
                         th:if="${#authorization.expression('hasRole(''BIB'')')}">Actions</th>
+                    <th style="text-align: center;"
+                        th:unless="${#authorization.expression('hasRole(''BIB'')')}">Réserver</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,6 +64,14 @@
                     <td th:text="${livre.anneePublication}">2026</td>
                     <td style="color: var(--text-secondary); font-size: 13px;"
                         th:text="${livre.isbn}">ISBN</td>
+
+                    <!-- Disponibilité -->
+                    <td style="text-align: center;">
+                        <span th:if="${disponibles[livre.id]}" class="badge badge-success">✅ Disponible</span>
+                        <span th:unless="${disponibles[livre.id]}" class="badge badge-danger">❌ Emprunté</span>
+                    </td>
+
+                    <!-- Actions admin -->
                     <td style="text-align: center;"
                         th:if="${#authorization.expression('hasRole(''BIB'')')}">
                         <a th:href="@{/livres/{id}/modifier(id=${livre.id})}"
@@ -71,6 +82,24 @@
                             <button type="submit" class="btn btn-danger btn-icon btn-sm"
                                     title="Supprimer">🗑️</button>
                         </form>
+                    </td>
+
+                    <!-- Bouton Réserver pour les membres -->
+                    <td style="text-align: center;"
+                        th:unless="${#authorization.expression('hasRole(''BIB'')')}">
+                        <form th:if="${!disponibles[livre.id]}"
+                              th:action="@{/reservations}"
+                              method="post" style="display:inline-block;">
+                            <input type="hidden" name="livreId" th:value="${livre.id}">
+                            <button type="submit" class="btn btn-warning btn-sm"
+                                    onclick="return confirm('Réserver ce livre ?');">
+                                📅 Réserver
+                            </button>
+                        </form>
+                        <span th:if="${disponibles[livre.id]}"
+                              style="color: var(--text-muted); font-size: 12px;">
+                            Emprunter directement
+                        </span>
                     </td>
                 </tr>
             </tbody>
