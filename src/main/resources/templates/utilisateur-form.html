@@ -2,74 +2,87 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Utilisateur</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-main fade-in">
+
+    <div class="page-header" style="justify-content: center; text-align: center;">
         <div>
-            <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-            <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
-            <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
-            <form th:action="@{/logout}" method="post" style="display:inline-block;">
-                <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
-            </form>
+            <h1 class="page-title" th:text="${utilisateur.id != null ? '✏️ Modifier un utilisateur' : '➕ Ajouter un utilisateur'}">
+                Ajouter un utilisateur
+            </h1>
+            <p class="page-subtitle">Créez un compte membre ou bibliothécaire</p>
         </div>
     </div>
-</nav>
 
-<div class="container mt-4" style="max-width: 700px;">
+    <div class="form-card">
+        <form th:action="@{/utilisateurs}" th:object="${utilisateur}" method="post">
+            <input type="hidden" th:field="*{id}">
 
-    <h1 class="mb-4" th:text="${utilisateur.id != null ? '✏️ Modifier un utilisateur' : '➕ Ajouter un utilisateur'}">
-        Ajouter un utilisateur
-    </h1>
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label class="form-label">Nom complet <span style="color: var(--danger);">*</span></label>
+                    <div class="input-icon" data-icon="👤">
+                        <input type="text" class="form-control" th:field="*{nom}"
+                               placeholder="Ex : Alice Dupont">
+                    </div>
+                    <div style="color: var(--danger); font-size: 12px; margin-top: 4px;"
+                         th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></div>
+                </div>
 
-    <form th:action="@{/utilisateurs}" th:object="${utilisateur}" method="post">
+                <div class="form-group full">
+                    <label class="form-label">Email <span style="color: var(--danger);">*</span></label>
+                    <div class="input-icon" data-icon="📧">
+                        <input type="email" class="form-control" th:field="*{email}"
+                               placeholder="Ex : alice@mail.com">
+                    </div>
+                    <div style="color: var(--danger); font-size: 12px; margin-top: 4px;"
+                         th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
 
-        <input type="hidden" th:field="*{id}">
+                <div class="form-group full">
+                    <label class="form-label">Mot de passe <span style="color: var(--danger);">*</span></label>
+                    <div class="input-icon" data-icon="🔒">
+                        <input type="text" class="form-control" th:field="*{motDePasse}"
+                               placeholder="Minimum 4 caractères">
+                    </div>
+                    <div style="color: var(--danger); font-size: 12px; margin-top: 4px;"
+                         th:if="${#fields.hasErrors('motDePasse')}" th:errors="*{motDePasse}"></div>
+                    <small style="color: var(--text-muted); font-size: 12px;">
+                        🔐 Sera hashé automatiquement (BCrypt)
+                    </small>
+                </div>
 
-        <div class="mb-3">
-            <label class="form-label">Nom <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" th:field="*{nom}" placeholder="Ex : Alice Dupont">
-            <div class="text-danger small" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></div>
-        </div>
+                <div class="form-group full">
+                    <label class="form-label">Rôle <span style="color: var(--danger);">*</span></label>
+                    <div class="input-icon" data-icon="🛡️">
+                        <select class="form-select" th:field="*{role}">
+                            <option value="">-- Choisir un rôle --</option>
+                            <option value="MEMBRE">👤 Membre (peut emprunter)</option>
+                            <option value="BIB">🛠️ Bibliothécaire (peut gérer)</option>
+                        </select>
+                    </div>
+                    <div style="color: var(--danger); font-size: 12px; margin-top: 4px;"
+                         th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Email <span class="text-danger">*</span></label>
-            <input type="email" class="form-control" th:field="*{email}" placeholder="Ex : alice@mail.com">
-            <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-        </div>
+            <div class="form-actions">
+                <a href="/utilisateurs" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Mot de passe <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" th:field="*{motDePasse}" placeholder="Minimum 4 caractères">
-            <div class="text-danger small" th:if="${#fields.hasErrors('motDePasse')}" th:errors="*{motDePasse}"></div>
-            <small class="text-muted">⚠️ Sera hashé automatiquement (BCrypt)</small>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Rôle <span class="text-danger">*</span></label>
-            <select class="form-select" th:field="*{role}">
-                <option value="">-- Choisir --</option>
-                <option value="MEMBRE">Membre</option>
-                <option value="BIB">Bibliothécaire</option>
-            </select>
-            <div class="text-danger small" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
-        </div>
-
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">💾 Enregistrer</button>
-            <a href="/utilisateurs" class="btn btn-secondary">Annuler</a>
-        </div>
-
-    </form>
+        </form>
+    </div>
 
 </div>
 
+<script th:replace="~{fragments/navbar :: themeScript}"></script>
 </body>
 </html>

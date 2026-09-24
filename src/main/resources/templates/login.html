@@ -2,65 +2,86 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Connexion</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .login-card {
-            max-width: 420px;
-            width: 100%;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Bibliothèque</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-<div class="login-card card p-4">
+<div class="login-split">
 
-    <div class="text-center mb-4">
-        <h1 class="h3 mb-2">📚 Bibliothèque</h1>
-        <p class="text-muted">Connectez-vous pour continuer</p>
-    </div>
+    <!-- Côté gauche : présentation -->
+    <div class="login-left">
+        <div class="login-left-content">
+            <div style="font-size: 72px; margin-bottom: 24px;">📚</div>
+            <h1>Bibliothèque Municipale</h1>
+            <p>Gérez votre bibliothèque en toute simplicité. Empruntez, suivez, et découvrez des milliers de livres.</p>
 
-    <div class="alert alert-danger" th:if="${param.error}">
-        ❌ Email ou mot de passe incorrect
-    </div>
-
-    <div class="alert alert-success" th:if="${param.logout}">
-        ✅ Vous êtes déconnecté
-    </div>
-
-    <form th:action="@{/login}" method="post">
-
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="username" class="form-control form-control-lg"
-                   placeholder="votre@email.com" required autofocus>
+            <div class="features">
+                <div class="feature-item">
+                    <span class="icon">📖</span>
+                    <span>Catalogue complet de livres</span>
+                </div>
+                <div class="feature-item">
+                    <span class="icon">📋</span>
+                    <span>Suivi des emprunts en temps réel</span>
+                </div>
+                <div class="feature-item">
+                    <span class="icon">💰</span>
+                    <span>Gestion automatique des amendes</span>
+                </div>
+                <div class="feature-item">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord et statistiques</span>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">Mot de passe</label>
-            <input type="password" name="password" class="form-control form-control-lg"
-                   placeholder="Votre mot de passe" required>
+    <!-- Côté droit : formulaire -->
+    <div class="login-right">
+        <div class="login-form">
+
+            <h2>Bienvenue 👋</h2>
+            <p class="subtitle">Connectez-vous pour accéder à votre espace</p>
+
+            <div class="alert alert-danger" th:if="${param.error}">
+                ❌ Email ou mot de passe incorrect
+            </div>
+
+            <div class="alert alert-success" th:if="${param.logout}">
+                ✅ Vous êtes déconnecté
+            </div>
+
+            <form th:action="@{/login}" method="post">
+
+                <div class="form-group">
+                    <label class="form-label">Adresse email</label>
+                    <div class="input-icon" data-icon="📧">
+                        <input type="email" name="username" class="form-control"
+                               placeholder="votre@email.com" required autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mot de passe</label>
+                    <div class="input-icon" data-icon="🔒">
+                        <input type="password" name="password" class="form-control"
+                               placeholder="Votre mot de passe" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    🔐 Se connecter
+                </button>
+
+            </form>
+
+            <div style="text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 13px;">
+                Contactez votre bibliothécaire pour obtenir vos identifiants.
+            </div>
+
         </div>
-
-        <button type="submit" class="btn btn-primary btn-lg w-100">
-            🔐 Se connecter
-        </button>
-
-    </form>
-
-    <hr class="my-4">
-
-    <div class="text-center small text-muted">
-        Contactez votre bibliothécaire pour obtenir vos identifiants.
     </div>
 
 </div>

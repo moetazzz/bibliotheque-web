@@ -2,84 +2,95 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Livre</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-main fade-in">
+
+    <div class="page-header" style="justify-content: center; text-align: center;">
         <div>
-            <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-            <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
-            <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
-            <form th:action="@{/logout}" method="post" style="display:inline-block;">
-                <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
-            </form>
+            <h1 class="page-title" th:text="${livre.id != null ? '✏️ Modifier un livre' : '➕ Ajouter un livre'}">
+                Ajouter un livre
+            </h1>
+            <p class="page-subtitle">Remplissez les informations du livre</p>
         </div>
     </div>
-</nav>
 
-<div class="container mt-4" style="max-width: 700px;">
+    <div class="form-card">
+        <form th:action="@{/livres}" th:object="${livre}" method="post">
+            <input type="hidden" th:field="*{id}">
 
-    <h1 class="mb-4" th:text="${livre.id != null ? '✏️ Modifier un livre' : '➕ Ajouter un livre'}">
-        Ajouter un livre
-    </h1>
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label class="form-label">Titre <span style="color: var(--danger);">*</span></label>
+                    <div class="input-icon" data-icon="📖">
+                        <input type="text" class="form-control" th:field="*{titre}"
+                               placeholder="Ex : Le Petit Prince">
+                    </div>
+                    <div style="color: var(--danger); font-size: 12px; margin-top: 4px;"
+                         th:if="${#fields.hasErrors('titre')}" th:errors="*{titre}"></div>
+                </div>
 
-    <form th:action="@{/livres}" th:object="${livre}" method="post">
+                <div class="form-group full">
+                    <label class="form-label">Auteur <span style="color: var(--danger);">*</span></label>
+                    <div class="input-icon" data-icon="✍️">
+                        <input type="text" class="form-control" th:field="*{auteur}"
+                               placeholder="Ex : Antoine de Saint-Exupéry">
+                    </div>
+                    <div style="color: var(--danger); font-size: 12px; margin-top: 4px;"
+                         th:if="${#fields.hasErrors('auteur')}" th:errors="*{auteur}"></div>
+                </div>
 
-        <input type="hidden" th:field="*{id}">
+                <div class="form-group">
+                    <label class="form-label">ISBN</label>
+                    <div class="input-icon" data-icon="🔢">
+                        <input type="text" class="form-control" th:field="*{isbn}"
+                               placeholder="978-2-07-040850-4">
+                    </div>
+                </div>
 
-        <div class="mb-3">
-            <label class="form-label">Titre <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" th:field="*{titre}" placeholder="Ex : Le Petit Prince">
-            <div class="text-danger small" th:if="${#fields.hasErrors('titre')}" th:errors="*{titre}"></div>
-        </div>
+                <div class="form-group">
+                    <label class="form-label">Année de publication</label>
+                    <div class="input-icon" data-icon="📅">
+                        <input type="number" class="form-control" th:field="*{anneePublication}"
+                               placeholder="1943" min="0" max="2100">
+                    </div>
+                    <div style="color: var(--danger); font-size: 12px; margin-top: 4px;"
+                         th:if="${#fields.hasErrors('anneePublication')}" th:errors="*{anneePublication}"></div>
+                </div>
 
-        <div class="mb-3">
-            <label class="form-label">Auteur <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" th:field="*{auteur}" placeholder="Ex : Saint-Exupéry">
-            <div class="text-danger small" th:if="${#fields.hasErrors('auteur')}" th:errors="*{auteur}"></div>
-        </div>
+                <div class="form-group full">
+                    <label class="form-label">Catégorie</label>
+                    <div class="input-icon" data-icon="🏷️">
+                        <select class="form-select" th:field="*{categorie}">
+                            <option value="">-- Choisir une catégorie --</option>
+                            <option value="ROMAN">📕 Roman</option>
+                            <option value="SCIENCE_FICTION">🚀 Science-Fiction</option>
+                            <option value="BIOGRAPHIE">👤 Biographie</option>
+                            <option value="HISTOIRE">🏛️ Histoire</option>
+                            <option value="JEUNESSE">🧒 Jeunesse</option>
+                            <option value="BD">💬 Bande dessinée</option>
+                            <option value="AUTRE">📚 Autre</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">ISBN</label>
-            <input type="text" class="form-control" th:field="*{isbn}" placeholder="Ex : 978-2-07-040850-4">
-        </div>
+            <div class="form-actions">
+                <a href="/livres" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Catégorie</label>
-            <select class="form-select" th:field="*{categorie}">
-                <option value="">-- Choisir --</option>
-                <option value="ROMAN">Roman</option>
-                <option value="SCIENCE_FICTION">Science-Fiction</option>
-                <option value="BIOGRAPHIE">Biographie</option>
-                <option value="HISTOIRE">Histoire</option>
-                <option value="JEUNESSE">Jeunesse</option>
-                <option value="BD">Bande dessinée</option>
-                <option value="AUTRE">Autre</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Année de publication</label>
-            <input type="number" class="form-control" th:field="*{anneePublication}"
-                   placeholder="Ex : 1943" min="0" max="2100">
-            <div class="text-danger small" th:if="${#fields.hasErrors('anneePublication')}"
-                 th:errors="*{anneePublication}"></div>
-        </div>
-
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">💾 Enregistrer</button>
-            <a href="/livres" class="btn btn-secondary">Annuler</a>
-        </div>
-
-    </form>
+        </form>
+    </div>
 
 </div>
 
+<script th:replace="~{fragments/navbar :: themeScript}"></script>
 </body>
 </html>
