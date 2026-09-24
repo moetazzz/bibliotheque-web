@@ -12,12 +12,15 @@
         <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
         <div>
             <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
+            <a href="/dashboard" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">📊 Dashboard</a>
             <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
             <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
             <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
+            <a href="/journal" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">📜 Journal</a>
             <form th:action="@{/logout}" method="post" style="display:inline-block;">
                 <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
             </form>
@@ -29,9 +32,7 @@
     <div class="text-center">
         <h1 class="display-3">📚 Bibliothèque Municipale</h1>
         <p class="lead">Bienvenue sur l'application de gestion de bibliothèque !</p>
-
         <hr class="my-4">
-
         <div class="d-grid gap-2 col-6 mx-auto mt-4">
             <a href="/livres" class="btn btn-primary btn-lg">📖 Voir les livres</a>
             <a href="/emprunts" class="btn btn-success btn-lg">📋 Voir les emprunts</a>

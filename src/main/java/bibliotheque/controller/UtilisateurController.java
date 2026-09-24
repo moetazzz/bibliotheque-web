@@ -1,7 +1,9 @@
 package bibliotheque.controller;
 
 import bibliotheque.modele.Utilisateur;
+import bibliotheque.service.AuditService;
 import bibliotheque.service.UtilisateurService;
+import bibliotheque.util.PasswordUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,13 +16,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/utilisateurs")
 public class UtilisateurController {
 
-    @Autowired
-    private UtilisateurService userService;
-
-    @Autowired
-    private bibliotheque.service.AuditService auditService;
-
-    // ==================== LISTE ====================
+    @Autowired private UtilisateurService userService;
+    @Autowired private AuditService auditService;
 
     @GetMapping
     public String liste(@RequestParam(required = false) String recherche, Model model) {
@@ -28,8 +25,6 @@ public class UtilisateurController {
         model.addAttribute("recherche", recherche);
         return "utilisateurs";
     }
-
-    // ==================== FORMULAIRE ====================
 
     @GetMapping("/nouveau")
     public String formulaireAjout(Model model) {
@@ -39,36 +34,40 @@ public class UtilisateurController {
 
     @GetMapping("/{id}/modifier")
     public String formulaireModification(@PathVariable Long id, Model model) {
-        Utilisateur user = userService.trouverParId(id);
-        if (user == null) {
-            return "redirect:/utilisateurs";
-        }
-        model.addAttribute("utilisateur", user);
+        Utilisateur u = userService.trouverParId(id);
+        if (u == null) return "redirect:/utilisateurs";
+        model.addAttribute("utilisateur", u);
         return "utilisateur-form";
     }
-
-    // ==================== ENREGISTREMENT ====================
 
     @PostMapping
     public String enregistrer(@Valid @ModelAttribute("utilisateur") Utilisateur user,
                               BindingResult result,
                               RedirectAttributes redirectAttrs) {
-        if (result.hasErrors()) {
+        if (result.hasErrors()) return "utilisateur-form";
+
+        // Vérifier email unique si nouveau
+        boolean estNouveau = (user.getId() == null);
+        if (estNouveau && userService.emailExiste(user.getEmail())) {
+            result.rejectValue("email", "error.email", "Cet email est déjà utilisé");
             return "utilisateur-form";
         }
-        boolean estNouveau = (user.getId() == null);
+
+        // Hasher le mot de passe s'il est modifié
+        if (user.getMotDePasse() != null && !user.getMotDePasse().startsWith("$2a$")) {
+            user.setMotDePasse(PasswordUtil.hasher(user.getMotDePasse()));
+        }
+
         userService.ajouter(user);
 
-        String action = estNouveau ? "AJOUT_USER" : "MODIF_USER";
-        auditService.enregistrer(user.getNom(), user.getId(), action,
+        auditService.enregistrer(user.getNom(), user.getId(),
+                estNouveau ? "AJOUT_USER" : "MODIF_USER",
                 (estNouveau ? "Ajout : " : "Modif : ") + user.getEmail());
 
         redirectAttrs.addFlashAttribute("message",
                 estNouveau ? "Utilisateur ajouté avec succès !" : "Utilisateur modifié avec succès !");
         return "redirect:/utilisateurs";
     }
-
-    // ==================== SUPPRESSION ====================
 
     @PostMapping("/{id}/supprimer")
     public String supprimer(@PathVariable Long id, RedirectAttributes redirectAttrs) {

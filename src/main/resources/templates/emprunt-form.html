@@ -12,9 +12,7 @@
         <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
         <div>
             <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
             <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
             <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
             <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
             <form th:action="@{/logout}" method="post" style="display:inline-block;">
@@ -29,7 +27,7 @@
     <h1 class="mb-4">📤 Nouvel emprunt</h1>
 
     <div class="alert alert-info">
-        ℹ️ Sélectionnez un livre et un membre. La date de retour sera automatiquement fixée à +14 jours.
+        ℹ️ Sélectionnez un livre. La date de retour sera automatiquement fixée à +14 jours.
     </div>
 
     <form th:action="@{/emprunts}" method="post">
@@ -38,11 +36,9 @@
             <label class="form-label">Livre <span class="text-danger">*</span></label>
             <select name="livreId" class="form-select" required>
                 <option value="">-- Choisir un livre --</option>
-                <option th:each="livre : ${livres}" 
+                <option th:each="livre : ${livres}"
                         th:value="${livre.id}"
-                        th:text="${livre.titre + ' — ' + livre.auteur}">
-                    Titre — Auteur
-                </option>
+                        th:text="${livre.titre + ' — ' + livre.auteur}">Titre</option>
             </select>
         </div>
 
@@ -50,11 +46,9 @@
             <label class="form-label">Emprunteur <span class="text-danger">*</span></label>
             <select name="utilisateurId" class="form-select" required>
                 <option value="">-- Choisir un membre --</option>
-                <option th:each="user : ${utilisateurs}" 
-                        th:value="${user.id}"
-                        th:text="${user.nom + ' (' + user.email + ')'}">
-                    Nom (email)
-                </option>
+                <option th:each="u : ${utilisateurs}"
+                        th:value="${u.id}"
+                        th:text="${u.nom + ' (' + u.email + ')'}">Nom</option>
             </select>
         </div>
 

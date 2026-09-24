@@ -4,7 +4,6 @@ import bibliotheque.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,23 +23,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        // ⚡ Spring Security 7 : le UserDetailsService passe au constructeur
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authenticationProvider(authenticationProvider())
+            .userDetailsService(userDetailsService)
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/livres/nouveau", "/livres/*/modifier",
-                                 "/livres/*/supprimer", "/utilisateurs/**").hasRole("BIB")
+                // ===== PUBLIC =====
+                .requestMatchers("/login", "/403", "/css/**", "/js/**", "/images/**", "/favicon.ico")
+                    .permitAll()
+
+                // ===== ADMIN UNIQUEMENT =====
+                .requestMatchers("/utilisateurs/**").hasRole("BIB")
+                .requestMatchers("/journal").hasRole("BIB")
+                .requestMatchers("/dashboard").hasRole("BIB")
+                .requestMatchers("/livres/nouveau", "/livres/*/modifier", "/livres/*/supprimer")
+                    .hasRole("BIB")
+                .requestMatchers("/emprunts/nouveau").hasRole("BIB")
+
+                // ===== CONNECTÉ =====
                 .anyRequest().authenticated()
+            )
+
+            .exceptionHandling(ex -> ex
+                .accessDeniedPage("/403")
             )
 
             .formLogin(form -> form
@@ -53,6 +58,8 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
             );
 

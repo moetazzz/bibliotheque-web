@@ -40,23 +40,17 @@ public class Amende {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public Utilisateur getUtilisateur() { return utilisateur; }
     public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
-
     public Emprunt getEmprunt() { return emprunt; }
     public void setEmprunt(Emprunt emprunt) { this.emprunt = emprunt; }
-
     public Double getMontant() { return montant; }
     public void setMontant(Double montant) { this.montant = montant; }
-
     public LocalDate getDateCreation() { return dateCreation; }
     public void setDateCreation(LocalDate dateCreation) { this.dateCreation = dateCreation; }
-
     public Boolean getPayee() { return payee; }
     public void setPayee(Boolean payee) { this.payee = payee; }
 
-    public String getStatut() {
-        return payee ? "PAYEE" : "IMPAYEE";
-    }
+    @Transient
+    public String getStatut() { return payee ? "PAYEE" : "IMPAYEE"; }
 }

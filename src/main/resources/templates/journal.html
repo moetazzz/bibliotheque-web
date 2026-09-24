@@ -14,9 +14,9 @@
             <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
             <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
             <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
             <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
             <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
             <a href="/journal" class="btn btn-outline-light btn-sm">📜 Journal</a>
             <form th:action="@{/logout}" method="post" style="display:inline-block;">
                 <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
@@ -48,10 +48,10 @@
                 <tbody>
                     <tr th:each="entry : ${entrees}">
                         <td th:text="${entry.id}">1</td>
-                        <td th:text="${#temporals.format(entry.dateAction, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026 12:00:00</td>
+                        <td th:text="${#temporals.format(entry.dateAction, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026 12:00</td>
                         <td th:text="${entry.nomUtilisateur}">Alice</td>
                         <td>
-                            <span class="badge" 
+                            <span class="badge"
                                   th:classappend="${entry.action.startsWith('AJOUT')} ? 'bg-success' :
                                                    (${entry.action.startsWith('SUPPR')} ? 'bg-danger' : 'bg-info')"
                                   th:text="${entry.action}">EMPRUNT</span>

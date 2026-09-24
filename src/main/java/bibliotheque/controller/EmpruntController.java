@@ -3,75 +3,96 @@ package bibliotheque.controller;
 import bibliotheque.modele.Emprunt;
 import bibliotheque.modele.Livre;
 import bibliotheque.modele.Utilisateur;
-import bibliotheque.service.AuditService;
-import bibliotheque.service.EmpruntService;
-import bibliotheque.service.LivreService;
-import bibliotheque.service.UtilisateurService;
+import bibliotheque.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/emprunts")
 public class EmpruntController {
 
-    @Autowired
-    private EmpruntService empruntService;
+    @Autowired private EmpruntService empruntService;
+    @Autowired private LivreService livreService;
+    @Autowired private UtilisateurService userService;
+    @Autowired private AuditService auditService;
 
-    @Autowired
-    private LivreService livreService;
-
-    @Autowired
-    private UtilisateurService userService;
-
-    @Autowired
-    private AuditService auditService;
-
-    // ==================== LISTE EN COURS ====================
+    private boolean estBibliothecaire(Authentication auth) {
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_BIB"));
+    }
 
     @GetMapping
-    public String liste(Model model) {
-        model.addAttribute("emprunts", empruntService.getEmpruntsEnCours());
+    public String liste(Model model, Authentication auth) {
+        Utilisateur user = userService.trouverParEmail(auth.getName());
+        boolean bib = estBibliothecaire(auth);
+
+        if (bib) {
+            model.addAttribute("emprunts", empruntService.getEmpruntsEnCours());
+        } else {
+            List<Emprunt> miens = empruntService.getEmpruntsEnCours().stream()
+                    .filter(e -> e.getUtilisateur().getId().equals(user.getId()))
+                    .toList();
+            model.addAttribute("emprunts", miens);
+        }
+        model.addAttribute("estBibliothecaire", bib);
         return "emprunts";
     }
-
-    // ==================== HISTORIQUE ====================
 
     @GetMapping("/historique")
-    public String historique(Model model) {
-        model.addAttribute("emprunts", empruntService.getTousLesEmprunts());
+    public String historique(Model model, Authentication auth) {
+        Utilisateur user = userService.trouverParEmail(auth.getName());
+        boolean bib = estBibliothecaire(auth);
+
+        if (bib) {
+            model.addAttribute("emprunts", empruntService.getTousLesEmprunts());
+        } else {
+            List<Emprunt> miens = empruntService.getTousLesEmprunts().stream()
+                    .filter(e -> e.getUtilisateur().getId().equals(user.getId()))
+                    .toList();
+            model.addAttribute("emprunts", miens);
+        }
         model.addAttribute("historique", true);
+        model.addAttribute("estBibliothecaire", bib);
         return "emprunts";
     }
 
-    // ==================== FORMULAIRE EMPRUNT ====================
-
     @GetMapping("/nouveau")
-    public String formulaireEmprunt(Model model) {
+    public String formulaireEmprunt(Model model, Authentication auth) {
+        Utilisateur user = userService.trouverParEmail(auth.getName());
         model.addAttribute("livres", livreService.getTousLesLivres());
         model.addAttribute("utilisateurs", userService.getTousLesUtilisateurs());
+        model.addAttribute("utilisateurConnecte", user);
         return "emprunt-form";
     }
 
-    // ==================== EMPRUNTER ====================
-
     @PostMapping
     public String emprunter(@RequestParam Long livreId,
-                            @RequestParam Long utilisateurId,
+                            @RequestParam(required = false) Long utilisateurId,
+                            Authentication auth,
                             RedirectAttributes redirectAttrs) {
         try {
+            Utilisateur demandeur = userService.trouverParEmail(auth.getName());
+            boolean bib = estBibliothecaire(auth);
+
+            Long cibleId = bib ? utilisateurId : demandeur.getId();
+            if (cibleId == null) throw new RuntimeException("Veuillez sélectionner un emprunteur");
+
             Livre livre = livreService.trouverParId(livreId);
-            Utilisateur user = userService.trouverParId(utilisateurId);
+            Utilisateur cible = userService.trouverParId(cibleId);
 
-            if (livre == null || user == null) {
+            if (livre == null || cible == null)
                 throw new RuntimeException("Livre ou utilisateur introuvable");
-            }
 
-            empruntService.emprunter(livre, user);
+            empruntService.verifierPermissionEmprunt(cible, demandeur);
+            empruntService.emprunter(livre, cible);
 
-            auditService.enregistrer(user.getNom(), user.getId(), "EMPRUNT",
+            auditService.enregistrer(cible.getNom(), cible.getId(), "EMPRUNT",
                     "Livre : " + livre.getTitre());
 
             redirectAttrs.addFlashAttribute("message", "Emprunt enregistré avec succès !");
@@ -79,16 +100,24 @@ public class EmpruntController {
         } catch (RuntimeException e) {
             redirectAttrs.addFlashAttribute("erreur", e.getMessage());
         }
-
         return "redirect:/emprunts";
     }
 
-    // ==================== RETOURNER ====================
-
     @PostMapping("/{id}/retourner")
-    public String retourner(@PathVariable Long id, RedirectAttributes redirectAttrs) {
+    public String retourner(@PathVariable Long id, Authentication auth,
+                            RedirectAttributes redirectAttrs) {
         try {
-            Emprunt emprunt = empruntService.retourner(id);
+            Emprunt emprunt = empruntService.trouverParId(id);
+            Utilisateur demandeur = userService.trouverParEmail(auth.getName());
+
+            if (emprunt == null) throw new RuntimeException("Emprunt introuvable");
+
+            if (!estBibliothecaire(auth) &&
+                !emprunt.getUtilisateur().getId().equals(demandeur.getId())) {
+                throw new RuntimeException("Vous ne pouvez retourner que vos propres emprunts");
+            }
+
+            emprunt = empruntService.retourner(id);
 
             auditService.enregistrer(emprunt.getUtilisateur().getNom(),
                     emprunt.getUtilisateur().getId(), "RETOUR",
@@ -99,35 +128,40 @@ public class EmpruntController {
                     ? "Livre retourné. ⚠️ Retard de " + emprunt.joursDeRetard() + " jours"
                     : "Livre retourné à temps !";
             redirectAttrs.addFlashAttribute("message", message);
+
         } catch (RuntimeException e) {
             redirectAttrs.addFlashAttribute("erreur", e.getMessage());
         }
         return "redirect:/emprunts";
     }
 
-    // ==================== PROLONGER ====================
-
     @PostMapping("/{id}/prolonger")
-    public String prolonger(@PathVariable Long id, RedirectAttributes redirectAttrs) {
+    public String prolonger(@PathVariable Long id, Authentication auth,
+                            RedirectAttributes redirectAttrs) {
         try {
             Emprunt emprunt = empruntService.trouverParId(id);
+            Utilisateur demandeur = userService.trouverParEmail(auth.getName());
+
+            if (emprunt == null) throw new RuntimeException("Emprunt introuvable");
+
+            if (!estBibliothecaire(auth) &&
+                !emprunt.getUtilisateur().getId().equals(demandeur.getId())) {
+                throw new RuntimeException("Vous ne pouvez prolonger que vos propres emprunts");
+            }
 
             empruntService.prolonger(id);
 
-            if (emprunt != null) {
-                auditService.enregistrer(emprunt.getUtilisateur().getNom(),
-                        emprunt.getUtilisateur().getId(), "PROLONGATION",
-                        "Livre : " + emprunt.getLivre().getTitre());
-            }
+            auditService.enregistrer(emprunt.getUtilisateur().getNom(),
+                    emprunt.getUtilisateur().getId(), "PROLONGATION",
+                    "Livre : " + emprunt.getLivre().getTitre());
 
             redirectAttrs.addFlashAttribute("message", "⏩ Prolongation accordée (+7 jours)");
+
         } catch (RuntimeException e) {
             redirectAttrs.addFlashAttribute("erreur", e.getMessage());
         }
         return "redirect:/emprunts";
     }
-
-    // ==================== SUPPRIMER ====================
 
     @PostMapping("/{id}/supprimer")
     public String supprimer(@PathVariable Long id, RedirectAttributes redirectAttrs) {

@@ -12,12 +12,15 @@
         <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
         <div>
             <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
+            <a href="/dashboard" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">📊 Dashboard</a>
             <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
             <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
             <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
+            <a href="/journal" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">📜 Journal</a>
             <form th:action="@{/logout}" method="post" style="display:inline-block;">
                 <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
             </form>
@@ -35,15 +38,14 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>💰 <span th:text="${vue == 'BIB'} ? 'Toutes les amendes' : 'Mes amendes'">Amendes</span></h1>
 
-        <!-- Solde du membre -->
         <div th:if="${vue == 'MEMBRE'}" class="card p-3">
             <div class="text-center">
-                <div class="h3 mb-0" 
+                <div class="h3 mb-0"
                      th:classappend="${utilisateur.soldeAmendes > 0} ? 'text-danger' : 'text-success'">
                     <span th:text="${#numbers.formatDecimal(utilisateur.soldeAmendes, 1, 2)}">0.00</span> €
                 </div>
                 <div class="small text-muted">Solde actuel</div>
-                <form th:action="@{/amendes/payer}" method="post" class="mt-2" 
+                <form th:action="@{/amendes/payer}" method="post" class="mt-2"
                       th:if="${utilisateur.soldeAmendes > 0}">
                     <button type="submit" class="btn btn-warning btn-sm"
                             onclick="return confirm('Payer toutes vos amendes ?');">
@@ -54,9 +56,8 @@
         </div>
     </div>
 
-    <!-- Blocage blacklist -->
     <div class="alert alert-danger" th:if="${vue == 'MEMBRE' and utilisateur.soldeAmendes >= 10.0}">
-        🚫 <strong>Attention !</strong> Votre solde d'amendes dépasse 10€. Vous ne pouvez plus emprunter de livres.
+        🚫 <strong>Attention !</strong> Votre solde d'amendes dépasse 10€. Vous ne pouvez plus emprunter.
     </div>
 
     <div class="card">
@@ -93,9 +94,7 @@
         </div>
     </div>
 
-    <p th:if="${#lists.isEmpty(amendes)}" class="alert alert-info mt-3">
-        📭 Aucune amende à afficher.
-    </p>
+    <p th:if="${#lists.isEmpty(amendes)}" class="alert alert-info mt-3">📭 Aucune amende à afficher.</p>
 
 </div>
 

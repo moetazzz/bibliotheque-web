@@ -12,8 +12,6 @@ public class Emprunt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ==================== RELATIONS ====================
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_livre", nullable = false)
     private Livre livre;
@@ -21,8 +19,6 @@ public class Emprunt {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_utilisateur", nullable = false)
     private Utilisateur utilisateur;
-
-    // ==================== DATES ====================
 
     @Column(name = "date_emprunt", nullable = false)
     private LocalDate dateEmprunt;
@@ -36,8 +32,6 @@ public class Emprunt {
     @Column(nullable = false)
     private Integer prolongations = 0;
 
-    // ==================== CONSTRUCTEURS ====================
-
     public Emprunt() {}
 
     public Emprunt(Livre livre, Utilisateur utilisateur, LocalDate dateEmprunt, LocalDate dateRetourPrevue) {
@@ -48,11 +42,7 @@ public class Emprunt {
         this.prolongations = 0;
     }
 
-    // ==================== MÉTHODES MÉTIER ====================
-
-    public boolean estRendu() {
-        return dateRetourEffective != null;
-    }
+    public boolean estRendu() { return dateRetourEffective != null; }
 
     public long joursDeRetard() {
         LocalDate ref = estRendu() ? dateRetourEffective : LocalDate.now();
@@ -68,26 +58,18 @@ public class Emprunt {
         return "EN_COURS";
     }
 
-    // ==================== GETTERS/SETTERS ====================
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public Livre getLivre() { return livre; }
     public void setLivre(Livre livre) { this.livre = livre; }
-
     public Utilisateur getUtilisateur() { return utilisateur; }
     public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
-
     public LocalDate getDateEmprunt() { return dateEmprunt; }
     public void setDateEmprunt(LocalDate dateEmprunt) { this.dateEmprunt = dateEmprunt; }
-
     public LocalDate getDateRetourPrevue() { return dateRetourPrevue; }
     public void setDateRetourPrevue(LocalDate dateRetourPrevue) { this.dateRetourPrevue = dateRetourPrevue; }
-
     public LocalDate getDateRetourEffective() { return dateRetourEffective; }
     public void setDateRetourEffective(LocalDate dateRetourEffective) { this.dateRetourEffective = dateRetourEffective; }
-
     public Integer getProlongations() { return prolongations; }
     public void setProlongations(Integer prolongations) { this.prolongations = prolongations; }
 }

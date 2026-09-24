@@ -17,9 +17,6 @@ public class AuditService {
     @Autowired
     private JournalAuditRepository auditRepo;
 
-    /**
-     * Enregistre une action dans le journal d'audit.
-     */
     public void enregistrer(String nomUtilisateur, Long idUtilisateur, String action, String details) {
         try {
             JournalAudit entry = new JournalAudit(nomUtilisateur, idUtilisateur, action, details);
@@ -34,7 +31,5 @@ public class AuditService {
         return auditRepo.findAllByOrderByDateActionDesc();
     }
 
-    public long compterActions() {
-        return auditRepo.count();
-    }
+    public long compterActions() { return auditRepo.count(); }
 }

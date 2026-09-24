@@ -38,19 +38,14 @@ public class JournalAudit {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public LocalDateTime getDateAction() { return dateAction; }
     public void setDateAction(LocalDateTime dateAction) { this.dateAction = dateAction; }
-
     public Long getIdUtilisateur() { return idUtilisateur; }
     public void setIdUtilisateur(Long idUtilisateur) { this.idUtilisateur = idUtilisateur; }
-
     public String getAction() { return action; }
     public void setAction(String action) { this.action = action; }
-
     public String getDetails() { return details; }
     public void setDetails(String details) { this.details = details; }
-
     public String getNomUtilisateur() { return nomUtilisateur; }
     public void setNomUtilisateur(String nomUtilisateur) { this.nomUtilisateur = nomUtilisateur; }
 }

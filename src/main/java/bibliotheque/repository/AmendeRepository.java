@@ -14,7 +14,7 @@ public interface AmendeRepository extends JpaRepository<Amende, Long> {
 
     List<Amende> findByPayeeFalseOrderByDateCreationDesc();
 
-    long countByUtilisateurAndPayeeFalse(Utilisateur utilisateur);
-
     List<Amende> findAllByOrderByDateCreationDesc();
+
+    long countByUtilisateurAndPayeeFalse(Utilisateur utilisateur);
 }

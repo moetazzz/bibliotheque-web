@@ -14,10 +14,10 @@
             <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
             <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
             <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
             <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
             <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
+            <a href="/journal" class="btn btn-outline-light btn-sm">📜 Journal</a>
             <form th:action="@{/logout}" method="post" style="display:inline-block;">
                 <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
             </form>
@@ -69,15 +69,15 @@
                                   th:text="${user.roleLibelle}">Membre</span>
                         </td>
                         <td>
-                            <span th:if="${user.soldeAmendes > 0}" class="text-danger fw-bold">
+                            <span th:if="${user.soldeAmendes != null and user.soldeAmendes > 0}" class="text-danger fw-bold">
                                 ⚠️ <span th:text="${#numbers.formatDecimal(user.soldeAmendes, 1, 2)}">0.00</span> €
                             </span>
-                            <span th:unless="${user.soldeAmendes > 0}" class="text-success">0.00 €</span>
+                            <span th:unless="${user.soldeAmendes != null and user.soldeAmendes > 0}" class="text-success">0.00 €</span>
                         </td>
                         <td class="text-center">
-                            <a th:href="@{/utilisateurs/{id}/modifier(id=${user.id})}" 
+                            <a th:href="@{/utilisateurs/{id}/modifier(id=${user.id})}"
                                class="btn btn-sm btn-warning">✏️</a>
-                            <form th:action="@{/utilisateurs/{id}/supprimer(id=${user.id})}" 
+                            <form th:action="@{/utilisateurs/{id}/supprimer(id=${user.id})}"
                                   method="post" style="display:inline-block;"
                                   onsubmit="return confirm('Supprimer cet utilisateur ?');">
                                 <button type="submit" class="btn btn-sm btn-danger">🗑️</button>

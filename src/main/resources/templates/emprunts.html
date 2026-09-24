@@ -12,11 +12,15 @@
         <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
         <div>
             <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
+            <a href="/dashboard" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">📊 Dashboard</a>
             <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
             <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
             <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
+            <a href="/utilisateurs" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">Utilisateurs</a>
+            <a href="/journal" class="btn btn-outline-light btn-sm"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">📜 Journal</a>
             <form th:action="@{/logout}" method="post" style="display:inline-block;">
                 <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
             </form>
@@ -26,13 +30,11 @@
 
 <div class="container mt-4">
 
-    <!-- Message succès -->
     <div class="alert alert-success alert-dismissible fade show" th:if="${message}" role="alert">
         ✅ <span th:text="${message}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Message erreur -->
     <div class="alert alert-danger alert-dismissible fade show" th:if="${erreur}" role="alert">
         ❌ <span th:text="${erreur}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -43,7 +45,8 @@
             Emprunts
         </h1>
         <div>
-            <a href="/emprunts/nouveau" class="btn btn-success">➕ Nouvel emprunt</a>
+            <a href="/emprunts/nouveau" class="btn btn-success"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">➕ Nouvel emprunt</a>
             <a th:if="${historique == null}" href="/emprunts/historique" class="btn btn-secondary">📜 Historique</a>
             <a th:if="${historique != null}" href="/emprunts" class="btn btn-secondary">📋 En cours</a>
         </div>
@@ -74,30 +77,27 @@
                         <td th:text="${emprunt.dateRetourEffective != null ? #temporals.format(emprunt.dateRetourEffective, 'dd/MM/yyyy') : '—'}">—</td>
                         <td>
                             <span th:if="${emprunt.statut == 'EN_COURS'}" class="badge bg-primary">📤 En cours</span>
-                            <span th:if="${emprunt.statut == 'EN_RETARD'}" class="badge bg-danger">⚠️ Retard de <span th:text="${emprunt.joursDeRetard()}">X</span> j</span>
+                            <span th:if="${emprunt.statut == 'EN_RETARD'}" class="badge bg-danger">⚠️ Retard <span th:text="${emprunt.joursDeRetard()}">X</span> j</span>
                             <span th:if="${emprunt.statut == 'RENDU'}" class="badge bg-success">✅ Rendu</span>
                         </td>
                         <td class="text-center">
-                            <form th:if="${!emprunt.estRendu()}" 
-                                  th:action="@{/emprunts/{id}/retourner(id=${emprunt.id})}" 
+                            <form th:if="${!emprunt.estRendu()}"
+                                  th:action="@{/emprunts/{id}/retourner(id=${emprunt.id})}"
                                   method="post" style="display:inline-block;">
-                                <button type="submit" class="btn btn-sm btn-primary" 
-                                        onclick="return confirm('Confirmer le retour de ce livre ?');">
-                                    📥 Retourner
-                                </button>
+                                <button type="submit" class="btn btn-sm btn-primary"
+                                        onclick="return confirm('Confirmer le retour ?');">📥 Retourner</button>
                             </form>
-                            <form th:action="@{/emprunts/{id}/supprimer(id=${emprunt.id})}" 
+                            <form th:if="${!emprunt.estRendu() and emprunt.prolongations < 1}"
+                                  th:action="@{/emprunts/{id}/prolonger(id=${emprunt.id})}"
+                                  method="post" style="display:inline-block;">
+                                <button type="submit" class="btn btn-sm btn-info"
+                                        onclick="return confirm('Prolonger de 7 jours ?');">⏩ Prolonger</button>
+                            </form>
+                            <form th:if="${#authorization.expression('hasRole(''BIB'')')}"
+                                  th:action="@{/emprunts/{id}/supprimer(id=${emprunt.id})}"
                                   method="post" style="display:inline-block;"
                                   onsubmit="return confirm('Supprimer cet emprunt ?');">
                                 <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
-                            </form>
-                            <form th:if="${!emprunt.estRendu() and emprunt.prolongations < 1}" 
-                                  th:action="@{/emprunts/{id}/prolonger(id=${emprunt.id})}" 
-                                  method="post" style="display:inline-block;">
-                                <button type="submit" class="btn btn-sm btn-info" 
-                                        onclick="return confirm('Prolonger de 7 jours ?');">
-                                    ⏩ Prolonger
-                                </button>
                             </form>
                         </td>
                     </tr>
@@ -106,9 +106,7 @@
         </div>
     </div>
 
-    <p th:if="${#lists.isEmpty(emprunts)}" class="alert alert-info mt-3">
-        📭 Aucun emprunt à afficher.
-    </p>
+    <p th:if="${#lists.isEmpty(emprunts)}" class="alert alert-info mt-3">📭 Aucun emprunt à afficher.</p>
 
 </div>
 

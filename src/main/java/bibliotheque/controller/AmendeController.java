@@ -1,6 +1,7 @@
 package bibliotheque.controller;
 
 import bibliotheque.modele.Utilisateur;
+import bibliotheque.service.AuditService;
 import bibliotheque.service.EmpruntService;
 import bibliotheque.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +15,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/amendes")
 public class AmendeController {
 
-    @Autowired
-    private EmpruntService empruntService;
-
-    @Autowired
-    private UtilisateurService userService;
+    @Autowired private EmpruntService empruntService;
+    @Autowired private UtilisateurService userService;
+    @Autowired private AuditService auditService;
 
     @GetMapping
     public String liste(Model model, Authentication auth) {
         Utilisateur user = userService.trouverParEmail(auth.getName());
+        boolean bib = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_BIB"));
 
-        if (user.getRole().equals("BIB")) {
-            // Bibliothécaire : voit toutes les amendes impayées
+        if (bib) {
             model.addAttribute("amendes", empruntService.getToutesLesAmendes());
             model.addAttribute("vue", "BIB");
         } else {
-            // Membre : voit ses propres amendes
             model.addAttribute("amendes", empruntService.getAmendesUtilisateur(user));
             model.addAttribute("vue", "MEMBRE");
         }
-
         model.addAttribute("utilisateur", user);
         return "amendes";
     }
@@ -42,14 +40,11 @@ public class AmendeController {
     public String payer(Authentication auth, RedirectAttributes redirectAttrs) {
         Utilisateur user = userService.trouverParEmail(auth.getName());
         empruntService.payerAmendes(user);
-        redirectAttrs.addFlashAttribute("message", "✅ Toutes vos amendes ont été payées !");
-        return "redirect:/amendes";
-    }
 
-    @PostMapping("/{id}/payer")
-    public String payerUne(@PathVariable Long id, RedirectAttributes redirectAttrs) {
-        // À implémenter : payer une amende spécifique (BIB)
-        redirectAttrs.addFlashAttribute("message", "Amende marquée comme payée");
+        auditService.enregistrer(user.getNom(), user.getId(), "PAIEMENT_AMENDES",
+                "Paiement de toutes les amendes");
+
+        redirectAttrs.addFlashAttribute("message", "✅ Toutes vos amendes ont été payées !");
         return "redirect:/amendes";
     }
 }

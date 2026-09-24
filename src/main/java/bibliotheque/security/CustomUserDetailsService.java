@@ -23,7 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         Utilisateur user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable : " + email));
 
-        // Convertit "MEMBRE" ou "BIB" en rôle Spring (ROLE_MEMBRE / ROLE_BIB)
         String role = "ROLE_" + user.getRole();
 
         return new User(

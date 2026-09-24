@@ -2,7 +2,6 @@ package bibliotheque.modele;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "utilisateurs")
@@ -28,7 +27,7 @@ public class Utilisateur {
 
     @NotBlank(message = "Le rôle est obligatoire")
     @Column(nullable = false)
-    private String role;  // "MEMBRE" ou "BIB"
+    private String role;
 
     @Column(name = "solde_amendes")
     private Double soldeAmendes = 0.0;
@@ -43,27 +42,19 @@ public class Utilisateur {
         this.soldeAmendes = 0.0;
     }
 
-    // ==================== Getters/Setters ====================
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
-
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-
     public String getMotDePasse() { return motDePasse; }
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
-
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
-
     public Double getSoldeAmendes() { return soldeAmendes; }
     public void setSoldeAmendes(Double soldeAmendes) { this.soldeAmendes = soldeAmendes; }
 
-    // Méthode utilitaire pour l'affichage (NON mappée en BDD)
     @Transient
     public String getRoleLibelle() {
         return "BIB".equals(role) ? "Bibliothécaire" : "Membre";

@@ -17,7 +17,6 @@ import java.util.List;
 @Service
 public class EmpruntService {
 
-    // Règles métier
     private static final int DUREE_EMPRUNT_JOURS = 14;
     private static final int LIMITE_EMPRUNTS = 3;
     private static final int DUREE_PROLONGATION_JOURS = 7;
@@ -25,14 +24,9 @@ public class EmpruntService {
     private static final double AMENDE_PAR_JOUR = 0.50;
     private static final double SEUIL_BLACKLIST = 10.0;
 
-    @Autowired
-    private EmpruntRepository empruntRepo;
-
-    @Autowired
-    private AmendeRepository amendeRepo;
-
-    @Autowired
-    private UtilisateurRepository userRepo;
+    @Autowired private EmpruntRepository empruntRepo;
+    @Autowired private AmendeRepository amendeRepo;
+    @Autowired private UtilisateurRepository userRepo;
 
     // ==================== LECTURE ====================
 
@@ -59,19 +53,14 @@ public class EmpruntService {
     // ==================== EMPRUNTER ====================
 
     public Emprunt emprunter(Livre livre, Utilisateur utilisateur) {
-        // Vérification 1 : livre disponible ?
         if (!estDisponible(livre)) {
             throw new RuntimeException("Le livre '" + livre.getTitre() + "' est déjà emprunté");
         }
-
-        // Vérification 2 : blacklist amendes
         if (utilisateur.getSoldeAmendes() != null && utilisateur.getSoldeAmendes() >= SEUIL_BLACKLIST) {
-            throw new RuntimeException(
-                "Amendes impayées : " + String.format("%.2f", utilisateur.getSoldeAmendes()) + "€. Emprunt bloqué."
-            );
+            throw new RuntimeException("Amendes impayées : "
+                    + String.format("%.2f", utilisateur.getSoldeAmendes())
+                    + "€. Emprunt bloqué.");
         }
-
-        // Vérification 3 : limite d'emprunts
         if (countEnCours(utilisateur) >= LIMITE_EMPRUNTS) {
             throw new RuntimeException("Limite de " + LIMITE_EMPRUNTS + " emprunts simultanés atteinte");
         }
@@ -81,44 +70,29 @@ public class EmpruntService {
         return empruntRepo.save(emprunt);
     }
 
-    // ==================== RETOURNER (avec amende auto) ====================
-
     @Transactional
     public Emprunt retourner(Long empruntId) {
         Emprunt emprunt = empruntRepo.findById(empruntId)
                 .orElseThrow(() -> new RuntimeException("Emprunt introuvable"));
 
-        if (emprunt.estRendu()) {
-            throw new RuntimeException("Ce livre a déjà été rendu");
-        }
+        if (emprunt.estRendu()) throw new RuntimeException("Ce livre a déjà été rendu");
 
         emprunt.setDateRetourEffective(LocalDate.now());
         empruntRepo.save(emprunt);
 
-        // Créer une amende si retard
         long joursRetard = emprunt.joursDeRetard();
-        if (joursRetard > 0) {
-            creerAmende(emprunt, joursRetard);
-        }
+        if (joursRetard > 0) creerAmende(emprunt, joursRetard);
 
         return emprunt;
     }
-
-    // ==================== PROLONGER ====================
 
     public Emprunt prolonger(Long empruntId) {
         Emprunt emprunt = empruntRepo.findById(empruntId)
                 .orElseThrow(() -> new RuntimeException("Emprunt introuvable"));
 
-        if (emprunt.estRendu()) {
-            throw new RuntimeException("Ce livre a déjà été rendu");
-        }
-
-        if (emprunt.getProlongations() >= MAX_PROLONGATIONS) {
+        if (emprunt.estRendu()) throw new RuntimeException("Ce livre a déjà été rendu");
+        if (emprunt.getProlongations() >= MAX_PROLONGATIONS)
             throw new RuntimeException("Maximum de prolongations atteint (1)");
-        }
-
-        // Vérifier si le livre est réservé par quelqu'un d'autre (à ajouter plus tard)
 
         emprunt.setDateRetourPrevue(emprunt.getDateRetourPrevue().plusDays(DUREE_PROLONGATION_JOURS));
         emprunt.setProlongations(emprunt.getProlongations() + 1);
@@ -129,14 +103,12 @@ public class EmpruntService {
 
     private void creerAmende(Emprunt emprunt, long joursRetard) {
         double montant = joursRetard * AMENDE_PAR_JOUR;
-
         Amende amende = new Amende(emprunt.getUtilisateur(), emprunt, montant);
         amendeRepo.save(amende);
 
-        // Mettre à jour le solde de l'utilisateur
         Utilisateur user = emprunt.getUtilisateur();
-        Double soldeActuel = user.getSoldeAmendes() == null ? 0.0 : user.getSoldeAmendes();
-        user.setSoldeAmendes(soldeActuel + montant);
+        Double solde = user.getSoldeAmendes() == null ? 0.0 : user.getSoldeAmendes();
+        user.setSoldeAmendes(solde + montant);
         userRepo.save(user);
     }
 
@@ -155,19 +127,29 @@ public class EmpruntService {
     @Transactional
     public void payerAmendes(Utilisateur user) {
         List<Amende> amendes = amendeRepo.findByUtilisateurOrderByDateCreationDesc(user);
-        for (Amende amende : amendes) {
-            if (!amende.getPayee()) {
-                amende.setPayee(true);
-                amendeRepo.save(amende);
+        for (Amende a : amendes) {
+            if (!a.getPayee()) {
+                a.setPayee(true);
+                amendeRepo.save(a);
             }
         }
         user.setSoldeAmendes(0.0);
         userRepo.save(user);
     }
 
-    // ==================== SUPPRESSION ====================
+    // ==================== PERMISSIONS ====================
 
-    public void supprimer(Long id) {
-        empruntRepo.deleteById(id);
+    public void verifierPermissionEmprunt(Utilisateur cible, Utilisateur demandeur) {
+        if (cible == null || demandeur == null)
+            throw new RuntimeException("Utilisateur introuvable");
+
+        boolean estBibliothecaire = "BIB".equals(demandeur.getRole());
+
+        if (!estBibliothecaire && !cible.getId().equals(demandeur.getId())) {
+            throw new RuntimeException(
+                "Un membre ne peut pas emprunter pour un autre membre.");
+        }
     }
+
+    public void supprimer(Long id) { empruntRepo.deleteById(id); }
 }
