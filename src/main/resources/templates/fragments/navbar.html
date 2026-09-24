@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- FRAGMENT : Navbar réutilisable -->
+<nav class="navbar" th:fragment="navbar">
+    <div class="container">
+        <a href="/" class="navbar-brand">
+            <span class="logo-icon">📚</span>
+            <span>Bibliothèque</span>
+        </a>
+
+        <div class="navbar-nav">
+            <a href="/" class="nav-link" 
+               th:classappend="${active == 'accueil'} ? 'active'">
+                <i>🏠</i> Accueil
+            </a>
+            <a href="/livres" class="nav-link"
+               th:classappend="${active == 'livres'} ? 'active'">
+                <i>📚</i> Livres
+            </a>
+            <a href="/emprunts" class="nav-link"
+               th:classappend="${active == 'emprunts'} ? 'active'">
+                <i>📋</i> Emprunts
+            </a>
+            <a href="/amendes" class="nav-link"
+               th:classappend="${active == 'amendes'} ? 'active'">
+                <i>💰</i> Amendes
+            </a>
+            <a href="/utilisateurs" class="nav-link"
+               th:classappend="${active == 'utilisateurs'} ? 'active'"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">
+                <i>👥</i> Utilisateurs
+            </a>
+            <a href="/dashboard" class="nav-link"
+               th:classappend="${active == 'dashboard'} ? 'active'"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">
+                <i>📊</i> Dashboard
+            </a>
+            <a href="/journal" class="nav-link"
+               th:classappend="${active == 'journal'} ? 'active'"
+               th:if="${#authorization.expression('hasRole(''BIB'')')}">
+                <i>📜</i> Journal
+            </a>
+        </div>
+
+        <div class="navbar-right">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Mode sombre/clair">🌙</button>
+            <div class="user-badge">
+                <div class="avatar" th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</div>
+                <span th:text="${#authentication.name}">admin@biblio.com</span>
+            </div>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="nav-link btn-logout">
+                    <i>🚪</i> Déconnexion
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- FRAGMENT : Script thème -->
+<script th:fragment="themeScript">
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const newTheme = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+}
+// Charge le thème au démarrage
+(function() {
+    const saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.querySelector('.theme-toggle');
+        if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+    });
+})();
+</script>
+
+</body>
+</html>

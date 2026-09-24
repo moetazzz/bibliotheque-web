@@ -2,74 +2,101 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .stat-card { transition: transform 0.2s; border-left: 5px solid; }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .stat-card.blue { border-color: #0d6efd; }
-        .stat-card.green { border-color: #198754; }
-        .stat-card.orange { border-color: #fd7e14; }
-        .stat-card.red { border-color: #dc3545; }
-        .stat-value { font-size: 2.5rem; font-weight: bold; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="/">📚 Bibliothèque Municipale</a>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-main fade-in">
+
+    <div class="page-header">
         <div>
-            <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-            <a href="/dashboard" class="btn btn-outline-light btn-sm">📊 Dashboard</a>
-            <a href="/livres" class="btn btn-outline-light btn-sm">Livres</a>
-            <a href="/emprunts" class="btn btn-outline-light btn-sm">Emprunts</a>
-            <a href="/amendes" class="btn btn-outline-light btn-sm">💰 Amendes</a>
-            <a href="/utilisateurs" class="btn btn-outline-light btn-sm">Utilisateurs</a>
-            <a href="/journal" class="btn btn-outline-light btn-sm">📜 Journal</a>
-            <form th:action="@{/logout}" method="post" style="display:inline-block;">
-                <button type="submit" class="btn btn-outline-warning btn-sm">🚪 Déconnexion</button>
-            </form>
-        </div>
-    </div>
-</nav>
-
-<div class="container mt-4">
-    <h1 class="mb-4">📊 Tableau de bord</h1>
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card stat-card blue p-3">
-                <div class="stat-value text-primary" th:text="${nbLivres}">0</div>
-                <div class="text-muted">📚 Livres</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card green p-3">
-                <div class="stat-value text-success" th:text="${nbUtilisateurs}">0</div>
-                <div class="text-muted">👥 Utilisateurs</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card orange p-3">
-                <div class="stat-value text-warning" th:text="${nbEmpruntsEnCours}">0</div>
-                <div class="text-muted">📋 Emprunts en cours</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card red p-3">
-                <div class="stat-value text-danger" th:text="${nbAmendesImpayees}">0</div>
-                <div class="text-muted">💰 Amendes impayées</div>
-            </div>
+            <h1 class="page-title">📊 Tableau de bord</h1>
+            <p class="page-subtitle">Vue d'ensemble de votre bibliothèque</p>
         </div>
     </div>
 
+    <!-- STATS CARDS -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="icon-box">📚</div>
+            <div class="stat-value" th:text="${nbLivres}">0</div>
+            <div class="stat-label">Livres au total</div>
+        </div>
+        <div class="stat-card green">
+            <div class="icon-box">👥</div>
+            <div class="stat-value" th:text="${nbUtilisateurs}">0</div>
+            <div class="stat-label">Utilisateurs</div>
+        </div>
+        <div class="stat-card orange">
+            <div class="icon-box">📋</div>
+            <div class="stat-value" th:text="${nbEmpruntsEnCours}">0</div>
+            <div class="stat-label">Emprunts en cours</div>
+        </div>
+        <div class="stat-card red">
+            <div class="icon-box">💰</div>
+            <div class="stat-value" th:text="${nbAmendesImpayees}">0</div>
+            <div class="stat-label">Amendes impayées</div>
+        </div>
+    </div>
+
+    <!-- GRAPHIQUES -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📈 Emprunts par mois</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartEmprunts" height="100"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📊 Catégories</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartCategories" height="200"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🏆 Top 5 livres les plus empruntés</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartTopLivres" height="150"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">💰 Amendes par mois</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartAmendes" height="150"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DERNIÈRES ACTIONS -->
     <div class="card">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0">🕵️ Dernières actions</h5>
+        <div class="card-header">
+            <h3 class="card-title">🕵️ Dernières actions</h3>
+            <a href="/journal" class="btn btn-secondary btn-sm">Voir tout</a>
         </div>
-        <div class="card-body p-0">
-            <table class="table table-sm table-striped mb-0">
+        <div style="overflow-x: auto;">
+            <table class="table-modern">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -84,8 +111,8 @@
                         <td th:text="${entry.nomUtilisateur}">Alice</td>
                         <td>
                             <span class="badge"
-                                  th:classappend="${entry.action.startsWith('AJOUT')} ? 'bg-success' :
-                                                   (${entry.action.startsWith('SUPPR')} ? 'bg-danger' : 'bg-info')"
+                                  th:classappend="${entry.action.startsWith('AJOUT')} ? 'badge-success' :
+                                                   (${entry.action.startsWith('SUPPR')} ? 'badge-danger' : 'badge-info')"
                                   th:text="${entry.action}">EMPRUNT</span>
                         </td>
                         <td th:text="${entry.details}">—</td>
@@ -93,8 +120,127 @@
                 </tbody>
             </table>
         </div>
+        <div th:if="${#lists.isEmpty(derniersActions)}" class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>Aucune action récente</h3>
+            <p>Les actions apparaîtront ici au fur et à mesure.</p>
+        </div>
     </div>
+
 </div>
 
+<!-- Chart.js Scripts -->
+<script th:inline="javascript">
+    // Configuration commune
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary');
+    Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border');
+
+    const primary = '#6366f1';
+    const violet = '#8b5cf6';
+    const success = '#10b981';
+    const warning = '#f59e0b';
+    const danger = '#ef4444';
+    const info = '#06b6d4';
+
+    // Graphique 1 : Emprunts par mois
+    new Chart(document.getElementById('chartEmprunts'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+            datasets: [{
+                label: 'Emprunts',
+                data: [12, 19, 15, 25, 22, 30, 28, 35, 42, 38, 45, 50],
+                borderColor: primary,
+                backgroundColor: 'rgba(99,102,241,0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: primary,
+                pointRadius: 5,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { drawBorder: false } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Graphique 2 : Catégories (doughnut)
+    new Chart(document.getElementById('chartCategories'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Roman', 'Science-Fiction', 'Jeunesse', 'Histoire', 'BD'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: [primary, violet, success, warning, info],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } }
+            }
+        }
+    });
+
+    // Graphique 3 : Top 5 livres
+    new Chart(document.getElementById('chartTopLivres'), {
+        type: 'bar',
+        data: {
+            labels: ['Le Petit Prince', '1984', 'Dune', 'Harry Potter', 'Le Hobbit'],
+            datasets: [{
+                data: [45, 38, 32, 28, 22],
+                backgroundColor: [primary, violet, success, warning, info],
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true, grid: { drawBorder: false } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Graphique 4 : Amendes par mois
+    new Chart(document.getElementById('chartAmendes'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+            datasets: [{
+                label: 'Amendes (€)',
+                data: [12, 19, 8, 15, 22, 18],
+                backgroundColor: danger,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { drawBorder: false } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+
+<script th:replace="~{fragments/navbar :: themeScript}"></script>
 </body>
 </html>
