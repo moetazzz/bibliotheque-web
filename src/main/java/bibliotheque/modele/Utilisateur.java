@@ -2,6 +2,7 @@ package bibliotheque.modele;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "utilisateurs")
@@ -62,7 +63,8 @@ public class Utilisateur {
     public Double getSoldeAmendes() { return soldeAmendes; }
     public void setSoldeAmendes(Double soldeAmendes) { this.soldeAmendes = soldeAmendes; }
 
-    // Méthode utilitaire pour l'affichage
+    // Méthode utilitaire pour l'affichage (NON mappée en BDD)
+    @Transient
     public String getRoleLibelle() {
         return "BIB".equals(role) ? "Bibliothécaire" : "Membre";
     }
