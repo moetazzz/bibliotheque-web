@@ -17,15 +17,15 @@ public interface LivreRepository extends JpaRepository<Livre, Long> {
 
     /**
      * Recherche multi-critères paginée.
-     * Tous les paramètres sont optionnels (null = ignoré).
+     * ⚠️ Les paramètres doivent être NON-NULL (valeurs par défaut passées depuis le service).
      */
     @Query("""
         SELECT l FROM Livre l
-        WHERE (:titre IS NULL OR LOWER(l.titre) LIKE LOWER(CONCAT('%', :titre, '%')))
-          AND (:auteur IS NULL OR LOWER(l.auteur) LIKE LOWER(CONCAT('%', :auteur, '%')))
-          AND (:categorie IS NULL OR l.categorie = :categorie)
-          AND (:anneeMin IS NULL OR l.anneePublication >= :anneeMin)
-          AND (:anneeMax IS NULL OR l.anneePublication <= :anneeMax)
+        WHERE LOWER(l.titre) LIKE LOWER(CONCAT('%', :titre, '%'))
+          AND LOWER(l.auteur) LIKE LOWER(CONCAT('%', :auteur, '%'))
+          AND (:categorie = '*' OR l.categorie = :categorie)
+          AND l.anneePublication >= :anneeMin
+          AND l.anneePublication <= :anneeMax
         """)
     Page<Livre> rechercherAvancee(
             @Param("titre") String titre,

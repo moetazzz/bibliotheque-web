@@ -33,27 +33,31 @@ public class LivreService {
 
     /**
      * Recherche avancée paginée avec tri.
+     * ⚠️ On passe des valeurs par défaut NON-NULL à la requête
+     * pour éviter le bug Hibernate 6 avec ':param IS NULL'.
      */
     public PaginationInfo<Livre> rechercherAvancee(
             String titre, String auteur, String categorie,
             Integer anneeMin, Integer anneeMax,
             int page, int taille, String triChamp, String triOrdre) {
 
-        // Normaliser les chaînes vides en null
-        String t = (titre == null || titre.isBlank()) ? null : titre;
-        String a = (auteur == null || auteur.isBlank()) ? null : auteur;
-        String c = (categorie == null || categorie.isBlank()) ? null : categorie;
+        // Valeurs par défaut non-null
+        String t = (titre == null || titre.isBlank()) ? "" : titre.trim();
+        String a = (auteur == null || auteur.isBlank()) ? "" : auteur.trim();
+        String c = (categorie == null || categorie.isBlank()) ? "*" : categorie.trim();
+        Integer min = (anneeMin == null) ? 0 : anneeMin;
+        Integer max = (anneeMax == null) ? 9999 : anneeMax;
 
-        // Construire le tri
+        // Tri
         Sort.Direction direction = "desc".equalsIgnoreCase(triOrdre)
                 ? Sort.Direction.DESC : Sort.Direction.ASC;
         String champ = (triChamp == null || triChamp.isBlank()) ? "titre" : triChamp;
         Sort sort = Sort.by(direction, champ);
 
-        // Page (attention : Spring pages commencent à 0)
+        // Page (Spring commence à 0)
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), taille, sort);
 
-        Page<Livre> resultat = livreRepo.rechercherAvancee(t, a, c, anneeMin, anneeMax, pageable);
+        Page<Livre> resultat = livreRepo.rechercherAvancee(t, a, c, min, max, pageable);
 
         return new PaginationInfo<>(
                 resultat.getContent(),
