@@ -3,6 +3,7 @@ package bibliotheque.controller;
 import bibliotheque.modele.Utilisateur;
 import bibliotheque.service.AuditService;
 import bibliotheque.service.UtilisateurService;
+import bibliotheque.util.PaginationInfo;
 import bibliotheque.util.PasswordUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,27 @@ public class UtilisateurController {
     @Autowired private AuditService auditService;
 
     @GetMapping
-    public String liste(@RequestParam(required = false) String recherche, Model model) {
-        model.addAttribute("utilisateurs", userService.rechercher(recherche));
-        model.addAttribute("recherche", recherche);
+    public String liste(
+            @RequestParam(required = false) String nom,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String role,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int taille,
+            @RequestParam(required = false) String tri,
+            @RequestParam(required = false) String ordre,
+            Model model) {
+
+        PaginationInfo<Utilisateur> pagination = userService.rechercherAvancee(
+                nom, email, role, page, taille, tri, ordre);
+
+        model.addAttribute("pagination", pagination);
+        model.addAttribute("utilisateurs", pagination.getItems());
+        model.addAttribute("nom", nom);
+        model.addAttribute("email", email);
+        model.addAttribute("role", role);
+        model.addAttribute("taille", taille);
+        model.addAttribute("tri", tri);
+        model.addAttribute("ordre", ordre);
         return "utilisateurs";
     }
 
@@ -46,8 +65,9 @@ public class UtilisateurController {
                               RedirectAttributes redirectAttrs) {
         if (result.hasErrors()) return "utilisateur-form";
 
-        // Vérifier email unique si nouveau
         boolean estNouveau = (user.getId() == null);
+
+        // Vérifier email unique si nouveau
         if (estNouveau && userService.emailExiste(user.getEmail())) {
             result.rejectValue("email", "error.email", "Cet email est déjà utilisé");
             return "utilisateur-form";

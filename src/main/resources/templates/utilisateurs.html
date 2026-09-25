@@ -15,7 +15,9 @@
     <div class="page-header">
         <div>
             <h1 class="page-title">👥 Utilisateurs</h1>
-            <p class="page-subtitle">Gérez les membres et bibliothécaires</p>
+            <p class="page-subtitle">
+                <span th:text="${pagination.totalItems}">0</span> utilisateur(s)
+            </p>
         </div>
         <a href="/utilisateurs/nouveau" class="btn btn-success">➕ Ajouter un utilisateur</a>
     </div>
@@ -24,63 +26,146 @@
         ✅ <span th:text="${message}"></span>
     </div>
 
-    <form method="get" class="search-bar">
-        <div class="search-input" style="flex: 1;">
-            <input type="text" name="recherche" th:value="${recherche}"
-                   placeholder="Rechercher par nom...">
+    <!-- FILTRES -->
+    <form method="get" class="filters-panel">
+        <div class="filters-grid">
+            <div>
+                <label class="form-label">Nom</label>
+                <input type="text" name="nom" class="form-control"
+                       th:value="${nom}" placeholder="Rechercher un nom...">
+            </div>
+            <div>
+                <label class="form-label">Email</label>
+                <input type="text" name="email" class="form-control"
+                       th:value="${email}" placeholder="Rechercher un email...">
+            </div>
+            <div>
+                <label class="form-label">Rôle</label>
+                <select name="role" class="form-select">
+                    <option value="">Tous</option>
+                    <option value="MEMBRE" th:selected="${role == 'MEMBRE'}">Membre</option>
+                    <option value="BIB" th:selected="${role == 'BIB'}">Bibliothécaire</option>
+                </select>
+            </div>
         </div>
-        <button class="btn btn-primary" type="submit">Rechercher</button>
+        <div class="filter-actions">
+            <a href="/utilisateurs" class="btn btn-secondary btn-sm">🔄 Réinitialiser</a>
+            <button type="submit" class="btn btn-primary btn-sm">🔍 Rechercher</button>
+        </div>
     </form>
 
-    <div class="table-container" th:if="${!#lists.isEmpty(utilisateurs)}">
-        <table class="table-modern">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nom</th>
-                    <th>Email</th>
-                    <th>Rôle</th>
-                    <th>Solde amendes</th>
-                    <th style="text-align: center;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="user : ${utilisateurs}">
-                    <td><span class="badge badge-gray" th:text="${user.id}">1</span></td>
-                    <td><strong th:text="${user.nom}">Alice</strong></td>
-                    <td th:text="${user.email}">alice@mail.com</td>
-                    <td>
-                        <span class="badge"
-                              th:classappend="${user.role == 'BIB'} ? 'badge-warning' : 'badge-primary'"
-                              th:text="${user.roleLibelle}">Membre</span>
-                    </td>
-                    <td>
-                        <span th:if="${user.soldeAmendes != null and user.soldeAmendes > 0}"
-                              style="color: var(--danger); font-weight: 700;">
-                            ⚠️ <span th:text="${#numbers.formatDecimal(user.soldeAmendes, 1, 2)}">0.00</span> €
-                        </span>
-                        <span th:unless="${user.soldeAmendes != null and user.soldeAmendes > 0}"
-                              style="color: var(--success);">0.00 €</span>
-                    </td>
-                    <td style="text-align: center;">
-                        <a th:href="@{/utilisateurs/{id}/modifier(id=${user.id})}"
-                           class="btn btn-warning btn-icon btn-sm">✏️</a>
-                        <form th:action="@{/utilisateurs/{id}/supprimer(id=${user.id})}"
-                              method="post" style="display:inline-block;"
-                              onsubmit="return confirm('Supprimer cet utilisateur ?');">
-                            <button type="submit" class="btn btn-danger btn-icon btn-sm">🗑️</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- TABLEAU -->
+    <div th:if="${!#lists.isEmpty(utilisateurs)}">
+        <div class="table-container">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="sortable"
+                            th:classappend="${tri == 'id'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                                taille=${taille},tri='id',ordre=${tri == 'id' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">ID</a>
+                        </th>
+                        <th class="sortable"
+                            th:classappend="${tri == 'nom'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                                taille=${taille},tri='nom',ordre=${tri == 'nom' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">Nom</a>
+                        </th>
+                        <th class="sortable"
+                            th:classappend="${tri == 'email'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                                taille=${taille},tri='email',ordre=${tri == 'email' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">Email</a>
+                        </th>
+                        <th>Rôle</th>
+                        <th>Solde amendes</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${utilisateurs}">
+                        <td><span class="badge badge-gray" th:text="${user.id}">1</span></td>
+                        <td><strong th:text="${user.nom}">Alice</strong></td>
+                        <td th:text="${user.email}">alice@mail.com</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${user.role == 'BIB'} ? 'badge-warning' : 'badge-primary'"
+                                  th:text="${user.roleLibelle}">Membre</span>
+                        </td>
+                        <td>
+                            <span th:if="${user.soldeAmendes != null and user.soldeAmendes > 0}"
+                                  style="color: var(--danger); font-weight: 700;">
+                                ⚠️ <span th:text="${#numbers.formatDecimal(user.soldeAmendes, 1, 2)}">0.00</span> €
+                            </span>
+                            <span th:unless="${user.soldeAmendes != null and user.soldeAmendes > 0}"
+                                  style="color: var(--success);">0.00 €</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <a th:href="@{/utilisateurs/{id}/modifier(id=${user.id})}"
+                               class="btn btn-warning btn-icon btn-sm">✏️</a>
+                            <form th:action="@{/utilisateurs/{id}/supprimer(id=${user.id})}"
+                                  method="post" style="display:inline-block;"
+                                  onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                                <button type="submit" class="btn btn-danger btn-icon btn-sm">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div style="display: flex; justify-content: space-between; align-items: center;
+                    margin-top: 20px; flex-wrap: wrap; gap: 12px;">
+            <div class="per-page-selector">
+                <label>Résultats par page :</label>
+                <select onchange="location.href=this.value">
+                    <option th:value="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                        tri=${tri},ordre=${ordre},taille=10,page=1)}"
+                            th:selected="${taille == 10}">10</option>
+                    <option th:value="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                        tri=${tri},ordre=${ordre},taille=25,page=1)}"
+                            th:selected="${taille == 25}">25</option>
+                    <option th:value="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                        tri=${tri},ordre=${ordre},taille=50,page=1)}"
+                            th:selected="${taille == 50}">50</option>
+                </select>
+            </div>
+
+            <div class="pagination" th:if="${pagination.totalPages > 1}">
+                <a th:href="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                    tri=${tri},ordre=${ordre},taille=${taille},page=${pagination.previousPage})}"
+                   th:classappend="${!pagination.hasPrevious()} ? 'disabled'">←</a>
+
+                <th:block th:each="p : ${pagination.pageNumbers}">
+                    <span th:if="${p == -1}" style="border: none; background: none;">…</span>
+                    <a th:unless="${p == -1}"
+                       th:href="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                           tri=${tri},ordre=${ordre},taille=${taille},page=${p})}"
+                       th:classappend="${p == pagination.currentPage} ? 'active'"
+                       th:text="${p}">1</a>
+                </th:block>
+
+                <a th:href="@{/utilisateurs(nom=${nom},email=${email},role=${role},
+                    tri=${tri},ordre=${ordre},taille=${taille},page=${pagination.nextPage})}"
+                   th:classappend="${!pagination.hasNext()} ? 'disabled'">→</a>
+            </div>
+        </div>
+
+        <div class="pagination-info">
+            Page <strong th:text="${pagination.currentPage}">1</strong>
+            sur <strong th:text="${pagination.totalPages}">1</strong>
+            — <span th:text="${pagination.totalItems}">0</span> résultat(s)
+        </div>
     </div>
 
     <div class="card" th:if="${#lists.isEmpty(utilisateurs)}">
         <div class="empty-state">
-            <div class="empty-icon">👥</div>
-            <h3>Aucun utilisateur</h3>
-            <p>Ajoutez des membres et bibliothécaires.</p>
+            <div class="empty-icon">🔍</div>
+            <h3>Aucun utilisateur trouvé</h3>
+            <p>Essayez d'autres filtres.</p>
+            <a href="/utilisateurs" class="btn btn-primary">🔄 Voir tous</a>
         </div>
     </div>
 

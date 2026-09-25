@@ -14,19 +14,13 @@
 
     <div class="page-header">
         <div>
-            <h1 class="page-title" th:text="${historique != null ? '📜 Historique' : '📋 Emprunts en cours'}">
-                Emprunts
-            </h1>
-            <p class="page-subtitle" th:text="${historique != null ? 'Tous les emprunts' : 'Emprunts actuellement en cours'}">
-                Emprunts
+            <h1 class="page-title">📋 Emprunts</h1>
+            <p class="page-subtitle">
+                <span th:text="${pagination.totalItems}">0</span> emprunt(s)
             </p>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <a href="/emprunts/nouveau" class="btn btn-success"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">➕ Nouvel emprunt</a>
-            <a th:if="${historique == null}" href="/emprunts/historique" class="btn btn-secondary">📜 Historique</a>
-            <a th:if="${historique != null}" href="/emprunts" class="btn btn-secondary">📋 En cours</a>
-        </div>
+        <a href="/emprunts/nouveau" class="btn btn-success"
+           th:if="${estBibliothecaire}">➕ Nouvel emprunt</a>
     </div>
 
     <div class="alert alert-success" th:if="${message}">
@@ -36,58 +30,135 @@
         ❌ <span th:text="${erreur}"></span>
     </div>
 
-    <div class="table-container" th:if="${!#lists.isEmpty(emprunts)}">
-        <table class="table-modern">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Livre</th>
-                    <th>Emprunteur</th>
-                    <th>Date emprunt</th>
-                    <th>Retour prévu</th>
-                    <th>Retour effectif</th>
-                    <th>Statut</th>
-                    <th style="text-align: center;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="emprunt : ${emprunts}">
-                    <td><span class="badge badge-gray" th:text="${emprunt.id}">1</span></td>
-                    <td><strong th:text="${emprunt.livre.titre}">Titre</strong></td>
-                    <td th:text="${emprunt.utilisateur.nom}">Alice</td>
-                    <td th:text="${#temporals.format(emprunt.dateEmprunt, 'dd/MM/yyyy')}">01/01/2026</td>
-                    <td th:text="${#temporals.format(emprunt.dateRetourPrevue, 'dd/MM/yyyy')}">15/01/2026</td>
-                    <td th:text="${emprunt.dateRetourEffective != null ? #temporals.format(emprunt.dateRetourEffective, 'dd/MM/yyyy') : '—'}">—</td>
-                    <td>
-                        <span th:if="${emprunt.statut == 'EN_COURS'}" class="badge badge-primary">📤 En cours</span>
-                        <span th:if="${emprunt.statut == 'EN_RETARD'}" class="badge badge-danger">
-                            ⚠️ Retard <span th:text="${emprunt.joursDeRetard()}">X</span> j
-                        </span>
-                        <span th:if="${emprunt.statut == 'RENDU'}" class="badge badge-success">✅ Rendu</span>
-                    </td>
-                    <td style="text-align: center; white-space: nowrap;">
-                        <form th:if="${!emprunt.estRendu()}"
-                              th:action="@{/emprunts/{id}/retourner(id=${emprunt.id})}"
-                              method="post" style="display:inline-block;">
-                            <button type="submit" class="btn btn-primary btn-sm"
-                                    onclick="return confirm('Confirmer le retour ?');">📥 Retourner</button>
-                        </form>
-                        <form th:if="${!emprunt.estRendu() and emprunt.prolongations < 1}"
-                              th:action="@{/emprunts/{id}/prolonger(id=${emprunt.id})}"
-                              method="post" style="display:inline-block;">
-                            <button type="submit" class="btn btn-warning btn-sm"
-                                    onclick="return confirm('Prolonger de 7 jours ?');">⏩ Prolonger</button>
-                        </form>
-                        <form th:if="${#authorization.expression('hasRole(''BIB'')')}"
-                              th:action="@{/emprunts/{id}/supprimer(id=${emprunt.id})}"
-                              method="post" style="display:inline-block;"
-                              onsubmit="return confirm('Supprimer cet emprunt ?');">
-                            <button type="submit" class="btn btn-danger btn-icon btn-sm">🗑️</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- FILTRES -->
+    <form method="get" class="filters-panel">
+        <div class="filters-grid">
+            <div>
+                <label class="form-label">Statut</label>
+                <select name="statut" class="form-select">
+                    <option value="EN_COURS" th:selected="${statut == 'EN_COURS'}">📤 En cours</option>
+                    <option value="RENDU" th:selected="${statut == 'RENDU'}">✅ Rendus</option>
+                    <option value="TOUS" th:selected="${statut == 'TOUS'}">📋 Tous</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <a href="/emprunts" class="btn btn-secondary btn-sm">🔄 Réinitialiser</a>
+            <button type="submit" class="btn btn-primary btn-sm">🔍 Filtrer</button>
+        </div>
+    </form>
+
+    <!-- TABLEAU -->
+    <div th:if="${!#lists.isEmpty(emprunts)}">
+        <div class="table-container">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="sortable"
+                            th:classappend="${tri == 'id'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/emprunts(statut=${statut},taille=${taille},
+                                tri='id',ordre=${tri == 'id' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">ID</a>
+                        </th>
+                        <th>Livre</th>
+                        <th>Emprunteur</th>
+                        <th class="sortable"
+                            th:classappend="${tri == 'dateEmprunt'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/emprunts(statut=${statut},taille=${taille},
+                                tri='dateEmprunt',ordre=${tri == 'dateEmprunt' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">Date emprunt</a>
+                        </th>
+                        <th class="sortable"
+                            th:classappend="${tri == 'dateRetourPrevue'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/emprunts(statut=${statut},taille=${taille},
+                                tri='dateRetourPrevue',ordre=${tri == 'dateRetourPrevue' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">Retour prévu</a>
+                        </th>
+                        <th>Retour effectif</th>
+                        <th>Statut</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="emprunt : ${emprunts}">
+                        <td><span class="badge badge-gray" th:text="${emprunt.id}">1</span></td>
+                        <td><strong th:text="${emprunt.livre.titre}">Titre</strong></td>
+                        <td th:text="${emprunt.utilisateur.nom}">Alice</td>
+                        <td th:text="${#temporals.format(emprunt.dateEmprunt, 'dd/MM/yyyy')}">01/01/2026</td>
+                        <td th:text="${#temporals.format(emprunt.dateRetourPrevue, 'dd/MM/yyyy')}">15/01/2026</td>
+                        <td th:text="${emprunt.dateRetourEffective != null ? #temporals.format(emprunt.dateRetourEffective, 'dd/MM/yyyy') : '—'}">—</td>
+                        <td>
+                            <span th:if="${emprunt.statut == 'EN_COURS'}" class="badge badge-primary">📤 En cours</span>
+                            <span th:if="${emprunt.statut == 'EN_RETARD'}" class="badge badge-danger">
+                                ⚠️ Retard <span th:text="${emprunt.joursDeRetard()}">X</span> j
+                            </span>
+                            <span th:if="${emprunt.statut == 'RENDU'}" class="badge badge-success">✅ Rendu</span>
+                        </td>
+                        <td style="text-align: center; white-space: nowrap;">
+                            <form th:if="${!emprunt.estRendu()}"
+                                  th:action="@{/emprunts/{id}/retourner(id=${emprunt.id})}"
+                                  method="post" style="display:inline-block;">
+                                <button type="submit" class="btn btn-primary btn-sm"
+                                        onclick="return confirm('Confirmer le retour ?');">📥</button>
+                            </form>
+                            <form th:if="${!emprunt.estRendu() and emprunt.prolongations < 1}"
+                                  th:action="@{/emprunts/{id}/prolonger(id=${emprunt.id})}"
+                                  method="post" style="display:inline-block;">
+                                <button type="submit" class="btn btn-warning btn-sm"
+                                        onclick="return confirm('Prolonger de 7 jours ?');">⏩</button>
+                            </form>
+                            <form th:if="${estBibliothecaire}"
+                                  th:action="@{/emprunts/{id}/supprimer(id=${emprunt.id})}"
+                                  method="post" style="display:inline-block;"
+                                  onsubmit="return confirm('Supprimer cet emprunt ?');">
+                                <button type="submit" class="btn btn-danger btn-icon btn-sm">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div style="display: flex; justify-content: space-between; align-items: center;
+                    margin-top: 20px; flex-wrap: wrap; gap: 12px;">
+            <div class="per-page-selector">
+                <label>Résultats par page :</label>
+                <select onchange="location.href=this.value">
+                    <option th:value="@{/emprunts(statut=${statut},tri=${tri},ordre=${ordre},taille=10,page=1)}"
+                            th:selected="${taille == 10}">10</option>
+                    <option th:value="@{/emprunts(statut=${statut},tri=${tri},ordre=${ordre},taille=25,page=1)}"
+                            th:selected="${taille == 25}">25</option>
+                    <option th:value="@{/emprunts(statut=${statut},tri=${tri},ordre=${ordre},taille=50,page=1)}"
+                            th:selected="${taille == 50}">50</option>
+                </select>
+            </div>
+
+            <div class="pagination" th:if="${pagination.totalPages > 1}">
+                <a th:href="@{/emprunts(statut=${statut},tri=${tri},ordre=${ordre},
+                    taille=${taille},page=${pagination.previousPage})}"
+                   th:classappend="${!pagination.hasPrevious()} ? 'disabled'">←</a>
+
+                <th:block th:each="p : ${pagination.pageNumbers}">
+                    <span th:if="${p == -1}" style="border: none; background: none;">…</span>
+                    <a th:unless="${p == -1}"
+                       th:href="@{/emprunts(statut=${statut},tri=${tri},ordre=${ordre},
+                           taille=${taille},page=${p})}"
+                       th:classappend="${p == pagination.currentPage} ? 'active'"
+                       th:text="${p}">1</a>
+                </th:block>
+
+                <a th:href="@{/emprunts(statut=${statut},tri=${tri},ordre=${ordre},
+                    taille=${taille},page=${pagination.nextPage})}"
+                   th:classappend="${!pagination.hasNext()} ? 'disabled'">→</a>
+            </div>
+        </div>
+
+        <div class="pagination-info">
+            Page <strong th:text="${pagination.currentPage}">1</strong>
+            sur <strong th:text="${pagination.totalPages}">1</strong>
+            — <span th:text="${pagination.totalItems}">0</span> résultat(s)
+        </div>
     </div>
 
     <div class="card" th:if="${#lists.isEmpty(emprunts)}">

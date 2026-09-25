@@ -1,5 +1,11 @@
 package bibliotheque.service;
 
+import bibliotheque.util.PaginationInfo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import bibliotheque.modele.Amende;
 import bibliotheque.modele.Emprunt;
 import bibliotheque.modele.Livre;
@@ -158,4 +164,31 @@ public class EmpruntService {
     }
 
     public void supprimer(Long id) { empruntRepo.deleteById(id); }
+        /**
+     * Recherche avancée paginée pour emprunts.
+     */
+    public PaginationInfo<Emprunt> rechercherAvancee(
+            String statut, Long idUtilisateur,
+            int page, int taille, String triChamp, String triOrdre) {
+
+        String s = (statut == null || statut.isBlank()) ? "TOUS" : statut;
+
+        Sort.Direction direction = "desc".equalsIgnoreCase(triOrdre)
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String champ = (triChamp == null || triChamp.isBlank())
+                ? "dateEmprunt" : triChamp;
+        Sort sort = Sort.by(direction, champ);
+
+        Pageable pageable = PageRequest.of(Math.max(0, page - 1), taille, sort);
+
+        Page<Emprunt> resultat = empruntRepo.rechercherAvancee(s, idUtilisateur, pageable);
+
+        return new PaginationInfo<>(
+                resultat.getContent(),
+                page,
+                resultat.getTotalPages(),
+                (int) resultat.getTotalElements(),
+                taille
+        );
+    }
 }

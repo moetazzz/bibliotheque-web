@@ -4,6 +4,8 @@ import bibliotheque.modele.Emprunt;
 import bibliotheque.modele.Livre;
 import bibliotheque.modele.Utilisateur;
 import bibliotheque.service.*;
+import bibliotheque.util.PaginationInfo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import bibliotheque.util.PaginationInfo;
 import java.util.List;
 
 @Controller
@@ -29,19 +32,35 @@ public class EmpruntController {
     }
 
     @GetMapping
-    public String liste(Model model, Authentication auth) {
+    public String liste(
+            @RequestParam(required = false) String statut,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int taille,
+            @RequestParam(required = false) String tri,
+            @RequestParam(required = false) String ordre,
+            Model model, Authentication auth) {
+
         Utilisateur user = userService.trouverParEmail(auth.getName());
         boolean bib = estBibliothecaire(auth);
 
-        if (bib) {
-            model.addAttribute("emprunts", empruntService.getEmpruntsEnCours());
-        } else {
-            List<Emprunt> miens = empruntService.getEmpruntsEnCours().stream()
-                    .filter(e -> e.getUtilisateur().getId().equals(user.getId()))
-                    .toList();
-            model.addAttribute("emprunts", miens);
-        }
+        // Statut par défaut
+        String s = (statut == null || statut.isBlank())
+                ? (bib ? "EN_COURS" : "EN_COURS")
+                : statut;
+
+        // Si membre : filtrer sur ses emprunts uniquement
+        Long idUser = bib ? null : user.getId();
+
+        PaginationInfo<Emprunt> pagination = empruntService.rechercherAvancee(
+                s, idUser, page, taille, tri, ordre);
+
+        model.addAttribute("pagination", pagination);
+        model.addAttribute("emprunts", pagination.getItems());
         model.addAttribute("estBibliothecaire", bib);
+        model.addAttribute("statut", s);
+        model.addAttribute("taille", taille);
+        model.addAttribute("tri", tri);
+        model.addAttribute("ordre", ordre);
         return "emprunts";
     }
 
