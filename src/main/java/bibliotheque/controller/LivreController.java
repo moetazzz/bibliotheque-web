@@ -4,6 +4,7 @@ import bibliotheque.modele.Livre;
 import bibliotheque.service.AuditService;
 import bibliotheque.service.EmpruntService;
 import bibliotheque.service.LivreService;
+import bibliotheque.util.PaginationInfo;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +15,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -26,11 +26,24 @@ public class LivreController {
     @Autowired private EmpruntService empruntService;
 
     @GetMapping
-    public String liste(@RequestParam(required = false) String recherche, Model model) {
-        List<Livre> livres = livreService.rechercher(recherche);
+    public String liste(
+            @RequestParam(required = false) String titre,
+            @RequestParam(required = false) String auteur,
+            @RequestParam(required = false) String categorie,
+            @RequestParam(required = false) Integer anneeMin,
+            @RequestParam(required = false) Integer anneeMax,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int taille,
+            @RequestParam(required = false) String tri,
+            @RequestParam(required = false) String ordre,
+            Model model) {
 
+        PaginationInfo<Livre> pagination = livreService.rechercherAvancee(
+                titre, auteur, categorie, anneeMin, anneeMax, page, taille, tri, ordre);
+
+        // Map de disponibilité pour les livres affichés
         Map<Long, Boolean> disponibles = new HashMap<>();
-        for (Livre l : livres) {
+        for (Livre l : pagination.getItems()) {
             try {
                 disponibles.put(l.getId(), empruntService.estDisponible(l));
             } catch (Exception e) {
@@ -38,9 +51,20 @@ public class LivreController {
             }
         }
 
-        model.addAttribute("livres", livres);
+        model.addAttribute("pagination", pagination);
+        model.addAttribute("livres", pagination.getItems());
         model.addAttribute("disponibles", disponibles);
-        model.addAttribute("recherche", recherche);
+
+        // Filtres (pour les réafficher dans le formulaire)
+        model.addAttribute("titre", titre);
+        model.addAttribute("auteur", auteur);
+        model.addAttribute("categorie", categorie);
+        model.addAttribute("anneeMin", anneeMin);
+        model.addAttribute("anneeMax", anneeMax);
+        model.addAttribute("taille", taille);
+        model.addAttribute("tri", tri);
+        model.addAttribute("ordre", ordre);
+
         return "livres";
     }
 

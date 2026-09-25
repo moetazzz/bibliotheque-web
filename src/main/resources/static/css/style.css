@@ -941,3 +941,134 @@ a { text-decoration: none; }
     .login-left .features { display: none; }
     .login-right { padding: 40px 20px; }
 }
+/* ==========================================================
+   FILTRES AVANCÉS
+   ========================================================== */
+.filters-panel {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* ==========================================================
+   PAGINATION
+   ========================================================== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.pagination a,
+.pagination span {
+    min-width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+    text-decoration: none;
+    padding: 0 12px;
+}
+
+.pagination a:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.pagination .active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+}
+
+.pagination .disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.pagination-info {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+/* ==========================================================
+   TABLE - Tri
+   ========================================================== */
+.table-modern th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 32px;
+}
+
+.table-modern th.sortable::after {
+    content: '↕';
+    position: absolute;
+    right: 12px;
+    opacity: 0.4;
+    font-size: 14px;
+}
+
+.table-modern th.sortable.asc::after {
+    content: '↑';
+    opacity: 1;
+    color: var(--primary);
+}
+
+.table-modern th.sortable.desc::after {
+    content: '↓';
+    opacity: 1;
+    color: var(--primary);
+}
+
+/* ==========================================================
+   PER-PAGE SELECTOR
+   ========================================================== */
+.per-page-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.per-page-selector select {
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 13px;
+}

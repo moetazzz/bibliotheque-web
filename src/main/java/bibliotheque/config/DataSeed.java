@@ -39,13 +39,19 @@ public class DataSeed implements CommandLineRunner {
             creerUtilisateur("Alice", "alice@mail.com", "Alice123!", "MEMBRE");
             creerUtilisateur("Bob", "bob@mail.com", "Bob12345!", "MEMBRE");
         }
-        if (livreCount == 0) {
-            creerLivre("Le Petit Prince", "Antoine de Saint-Exupéry",
-                    "978-2-07-040850-4", "JEUNESSE", 1943);
-            creerLivre("1984", "George Orwell",
-                    "978-2-07-036822-8", "SCIENCE_FICTION", 1949);
-            creerLivre("Dune", "Frank Herbert",
-                    "978-0441013593", "SCIENCE_FICTION", 1965);
+        if (livreCount ==3) {
+            creerLivre("Le Petit Prince", "Antoine de Saint-Exupéry", "978-2-07-040850-4", "JEUNESSE", 1943);
+            creerLivre("1984", "George Orwell", "978-2-07-036822-8", "SCIENCE_FICTION", 1949);
+            creerLivre("Dune", "Frank Herbert", "978-0441013593", "SCIENCE_FICTION", 1965);
+            creerLivre("Harry Potter à l'école des sorciers", "J.K. Rowling", "978-2070584628", "JEUNESSE", 1997);
+            creerLivre("Le Hobbit", "J.R.R. Tolkien", "978-2266150941", "SCIENCE_FICTION", 1937);
+            creerLivre("Fondation", "Isaac Asimov", "978-2070415700", "SCIENCE_FICTION", 1951);
+            creerLivre("Les Misérables", "Victor Hugo", "978-2253096337", "ROMAN", 1862);
+            creerLivre("L'Étranger", "Albert Camus", "978-2070360024", "ROMAN", 1942);
+            creerLivre("Le Comte de Monte-Cristo", "Alexandre Dumas", "978-2253004226", "ROMAN", 1844);
+            creerLivre("Voyage au bout de la nuit", "Louis-Ferdinand Céline", "978-2070360284", "ROMAN", 1932);
+            creerLivre("La Peste", "Albert Camus", "978-2070360420", "ROMAN", 1947);
+            creerLivre("Le Rouge et le Noir", "Stendhal", "978-2253004226", "ROMAN", 1830);
         }
         
     }

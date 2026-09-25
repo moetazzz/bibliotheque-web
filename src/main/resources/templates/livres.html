@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livres</title>
+    <title>Catalogue</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -15,7 +15,9 @@
     <div class="page-header">
         <div>
             <h1 class="page-title">📚 Catalogue</h1>
-            <p class="page-subtitle">Tous les livres de la bibliothèque</p>
+            <p class="page-subtitle">
+                <span th:text="${pagination.totalItems}">0</span> livre(s) au total
+            </p>
         </div>
         <a href="/livres/nouveau" class="btn btn-success"
            th:if="${#authorization.expression('hasRole(''BIB'')')}">
@@ -27,94 +29,192 @@
         ✅ <span th:text="${message}"></span>
     </div>
 
-    <form method="get" class="search-bar">
-        <div class="search-input" style="flex: 1;">
-            <input type="text" name="recherche" th:value="${recherche}"
-                   placeholder="Rechercher un titre, un auteur...">
+    <!-- FILTRES AVANCÉS -->
+    <form method="get" class="filters-panel">
+        <div class="filters-grid">
+            <div>
+                <label class="form-label">Titre</label>
+                <input type="text" name="titre" class="form-control"
+                       th:value="${titre}" placeholder="Rechercher un titre...">
+            </div>
+            <div>
+                <label class="form-label">Auteur</label>
+                <input type="text" name="auteur" class="form-control"
+                       th:value="${auteur}" placeholder="Rechercher un auteur...">
+            </div>
+            <div>
+                <label class="form-label">Catégorie</label>
+                <select name="categorie" class="form-select">
+                    <option value="">Toutes</option>
+                    <option value="ROMAN" th:selected="${categorie == 'ROMAN'}">Roman</option>
+                    <option value="SCIENCE_FICTION" th:selected="${categorie == 'SCIENCE_FICTION'}">Science-Fiction</option>
+                    <option value="BIOGRAPHIE" th:selected="${categorie == 'BIOGRAPHIE'}">Biographie</option>
+                    <option value="HISTOIRE" th:selected="${categorie == 'HISTOIRE'}">Histoire</option>
+                    <option value="JEUNESSE" th:selected="${categorie == 'JEUNESSE'}">Jeunesse</option>
+                    <option value="BD" th:selected="${categorie == 'BD'}">BD</option>
+                    <option value="AUTRE" th:selected="${categorie == 'AUTRE'}">Autre</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Année min</label>
+                <input type="number" name="anneeMin" class="form-control"
+                       th:value="${anneeMin}" placeholder="1900">
+            </div>
+            <div>
+                <label class="form-label">Année max</label>
+                <input type="number" name="anneeMax" class="form-control"
+                       th:value="${anneeMax}" placeholder="2100">
+            </div>
         </div>
-        <button class="btn btn-primary" type="submit">Rechercher</button>
+
+        <div class="filter-actions">
+            <a href="/livres" class="btn btn-secondary btn-sm">🔄 Réinitialiser</a>
+            <button type="submit" class="btn btn-primary btn-sm">🔍 Rechercher</button>
+        </div>
     </form>
 
-    <div class="table-container" th:if="${!#lists.isEmpty(livres)}">
-        <table class="table-modern">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Titre</th>
-                    <th>Auteur</th>
-                    <th>Catégorie</th>
-                    <th>Année</th>
-                    <th>ISBN</th>
-                    <th style="text-align: center;">Disponibilité</th>
-                    <th style="text-align: center;"
-                        th:if="${#authorization.expression('hasRole(''BIB'')')}">Actions</th>
-                    <th style="text-align: center;"
-                        th:unless="${#authorization.expression('hasRole(''BIB'')')}">Réserver</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="livre : ${livres}">
-                    <td><span class="badge badge-gray" th:text="${livre.id}">1</span></td>
-                    <td><strong th:text="${livre.titre}">Titre</strong></td>
-                    <td th:text="${livre.auteur}">Auteur</td>
-                    <td>
-                        <span class="badge badge-primary"
-                              th:text="${livre.categorie}">Catégorie</span>
-                    </td>
-                    <td th:text="${livre.anneePublication}">2026</td>
-                    <td style="color: var(--text-secondary); font-size: 13px;"
-                        th:text="${livre.isbn}">ISBN</td>
+    <!-- RESULTATS -->
+    <div th:if="${!#lists.isEmpty(livres)}">
 
-                    <!-- Disponibilité -->
-                    <td style="text-align: center;">
-                        <span th:if="${disponibles[livre.id]}" class="badge badge-success">✅ Disponible</span>
-                        <span th:unless="${disponibles[livre.id]}" class="badge badge-danger">❌ Emprunté</span>
-                    </td>
+        <div class="table-container">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="sortable"
+                            th:classappend="${tri == 'id'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                                anneeMin=${anneeMin},anneeMax=${anneeMax},taille=${taille},
+                                tri='id',ordre=${tri == 'id' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">ID</a>
+                        </th>
+                        <th class="sortable"
+                            th:classappend="${tri == 'titre'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                                anneeMin=${anneeMin},anneeMax=${anneeMax},taille=${taille},
+                                tri='titre',ordre=${tri == 'titre' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">Titre</a>
+                        </th>
+                        <th class="sortable"
+                            th:classappend="${tri == 'auteur'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                                anneeMin=${anneeMin},anneeMax=${anneeMax},taille=${taille},
+                                tri='auteur',ordre=${tri == 'auteur' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">Auteur</a>
+                        </th>
+                        <th>Catégorie</th>
+                        <th class="sortable"
+                            th:classappend="${tri == 'anneePublication'} ? ${ordre == 'desc' ? 'desc' : 'asc'}">
+                            <a th:href="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                                anneeMin=${anneeMin},anneeMax=${anneeMax},taille=${taille},
+                                tri='anneePublication',ordre=${tri == 'anneePublication' and ordre != 'desc' ? 'desc' : 'asc'})}"
+                               style="color: inherit;">Année</a>
+                        </th>
+                        <th>ISBN</th>
+                        <th style="text-align: center;">Disponibilité</th>
+                        <th style="text-align: center;"
+                            th:if="${#authorization.expression('hasRole(''BIB'')')}">Actions</th>
+                        <th style="text-align: center;"
+                            th:unless="${#authorization.expression('hasRole(''BIB'')')}">Réserver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="livre : ${livres}">
+                        <td><span class="badge badge-gray" th:text="${livre.id}">1</span></td>
+                        <td><strong th:text="${livre.titre}">Titre</strong></td>
+                        <td th:text="${livre.auteur}">Auteur</td>
+                        <td><span class="badge badge-primary" th:text="${livre.categorie}">Catégorie</span></td>
+                        <td th:text="${livre.anneePublication}">2026</td>
+                        <td style="color: var(--text-secondary); font-size: 13px;"
+                            th:text="${livre.isbn}">ISBN</td>
 
-                    <!-- Actions admin -->
-                    <td style="text-align: center;"
-                        th:if="${#authorization.expression('hasRole(''BIB'')')}">
-                        <a th:href="@{/livres/{id}/modifier(id=${livre.id})}"
-                           class="btn btn-warning btn-icon btn-sm" title="Modifier">✏️</a>
-                        <form th:action="@{/livres/{id}/supprimer(id=${livre.id})}"
-                              method="post" style="display:inline-block;"
-                              onsubmit="return confirm('Supprimer ce livre ?');">
-                            <button type="submit" class="btn btn-danger btn-icon btn-sm"
-                                    title="Supprimer">🗑️</button>
-                        </form>
-                    </td>
+                        <td style="text-align: center;">
+                            <span th:if="${disponibles[livre.id]}" class="badge badge-success">✅ Dispo</span>
+                            <span th:unless="${disponibles[livre.id]}" class="badge badge-danger">❌ Emprunté</span>
+                        </td>
 
-                    <!-- Bouton Réserver pour les membres -->
-                    <td style="text-align: center;"
-                        th:unless="${#authorization.expression('hasRole(''BIB'')')}">
-                        <form th:if="${!disponibles[livre.id]}"
-                              th:action="@{/reservations}"
-                              method="post" style="display:inline-block;">
-                            <input type="hidden" name="livreId" th:value="${livre.id}">
-                            <button type="submit" class="btn btn-warning btn-sm"
-                                    onclick="return confirm('Réserver ce livre ?');">
-                                📅 Réserver
-                            </button>
-                        </form>
-                        <span th:if="${disponibles[livre.id]}"
-                              style="color: var(--text-muted); font-size: 12px;">
-                            Emprunter directement
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        <td style="text-align: center;"
+                            th:if="${#authorization.expression('hasRole(''BIB'')')}">
+                            <a th:href="@{/livres/{id}/modifier(id=${livre.id})}"
+                               class="btn btn-warning btn-icon btn-sm">✏️</a>
+                            <form th:action="@{/livres/{id}/supprimer(id=${livre.id})}"
+                                  method="post" style="display:inline-block;"
+                                  onsubmit="return confirm('Supprimer ce livre ?');">
+                                <button type="submit" class="btn btn-danger btn-icon btn-sm">🗑️</button>
+                            </form>
+                        </td>
+
+                        <td style="text-align: center;"
+                            th:unless="${#authorization.expression('hasRole(''BIB'')')}">
+                            <form th:if="${!disponibles[livre.id]}"
+                                  th:action="@{/reservations}"
+                                  method="post" style="display:inline-block;">
+                                <input type="hidden" name="livreId" th:value="${livre.id}">
+                                <button type="submit" class="btn btn-warning btn-sm"
+                                        onclick="return confirm('Réserver ce livre ?');">📅 Réserver</button>
+                            </form>
+                            <span th:if="${disponibles[livre.id]}"
+                                  style="color: var(--text-muted); font-size: 12px;">—</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div style="display: flex; justify-content: space-between; align-items: center;
+                    margin-top: 20px; flex-wrap: wrap; gap: 12px;">
+            <div class="per-page-selector">
+                <label>Résultats par page :</label>
+                <select onchange="location.href=this.value">
+                    <option th:value="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                        anneeMin=${anneeMin},anneeMax=${anneeMax},tri=${tri},ordre=${ordre},taille=10,page=1)}"
+                            th:selected="${taille == 10}">10</option>
+                    <option th:value="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                        anneeMin=${anneeMin},anneeMax=${anneeMax},tri=${tri},ordre=${ordre},taille=25,page=1)}"
+                            th:selected="${taille == 25}">25</option>
+                    <option th:value="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                        anneeMin=${anneeMin},anneeMax=${anneeMax},tri=${tri},ordre=${ordre},taille=50,page=1)}"
+                            th:selected="${taille == 50}">50</option>
+                </select>
+            </div>
+
+            <div class="pagination" th:if="${pagination.totalPages > 1}">
+                <a th:href="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                    anneeMin=${anneeMin},anneeMax=${anneeMax},tri=${tri},ordre=${ordre},
+                    taille=${taille},page=${pagination.previousPage})}"
+                   th:classappend="${!pagination.hasPrevious()} ? 'disabled'">←</a>
+
+                <th:block th:each="p : ${pagination.pageNumbers}">
+                    <span th:if="${p == -1}" style="border: none; background: none;">…</span>
+                    <a th:unless="${p == -1}"
+                       th:href="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                           anneeMin=${anneeMin},anneeMax=${anneeMax},tri=${tri},ordre=${ordre},
+                           taille=${taille},page=${p})}"
+                       th:classappend="${p == pagination.currentPage} ? 'active'"
+                       th:text="${p}">1</a>
+                </th:block>
+
+                <a th:href="@{/livres(titre=${titre},auteur=${auteur},categorie=${categorie},
+                    anneeMin=${anneeMin},anneeMax=${anneeMax},tri=${tri},ordre=${ordre},
+                    taille=${taille},page=${pagination.nextPage})}"
+                   th:classappend="${!pagination.hasNext()} ? 'disabled'">→</a>
+            </div>
+        </div>
+
+        <div class="pagination-info">
+            Page <strong th:text="${pagination.currentPage}">1</strong>
+            sur <strong th:text="${pagination.totalPages}">1</strong>
+            — <span th:text="${pagination.totalItems}">0</span> résultat(s)
+        </div>
+
     </div>
 
     <div class="card" th:if="${#lists.isEmpty(livres)}">
         <div class="empty-state">
-            <div class="empty-icon">📚</div>
+            <div class="empty-icon">🔍</div>
             <h3>Aucun livre trouvé</h3>
-            <p>Commencez par ajouter un livre à votre catalogue.</p>
-            <a href="/livres/nouveau" class="btn btn-primary"
-               th:if="${#authorization.expression('hasRole(''BIB'')')}">
-                ➕ Ajouter un livre
-            </a>
+            <p>Essayez d'autres filtres de recherche.</p>
+            <a href="/livres" class="btn btn-primary">🔄 Voir tout le catalogue</a>
         </div>
     </div>
 
