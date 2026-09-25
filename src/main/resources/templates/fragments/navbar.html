@@ -52,10 +52,11 @@
 
         <div class="navbar-right">
             <button class="theme-toggle" onclick="toggleTheme()" title="Mode sombre/clair">🌙</button>
-            <div class="user-badge">
+            <a href="/profil" class="user-badge" style="text-decoration: none; cursor: pointer;"
+               title="Mon profil">
                 <div class="avatar" th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</div>
                 <span th:text="${#authentication.name}">admin@biblio.com</span>
-            </div>
+            </a>
             <form th:action="@{/logout}" method="post" style="display:inline;">
                 <button type="submit" class="nav-link btn-logout">
                     <i>🚪</i> Déconnexion

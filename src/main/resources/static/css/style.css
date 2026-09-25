@@ -188,8 +188,14 @@ a { text-decoration: none; }
     color: white;
     font-size: 13px;
     font-weight: 500;
+    transition: var(--transition);
 }
 
+.user-badge:hover {
+    background: rgba(255,255,255,0.18);
+    transform: translateY(-1px);
+    color: white;
+}
 .user-badge .avatar {
     width: 28px;
     height: 28px;
