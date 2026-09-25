@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"></head>
+<body style="margin: 0; font-family: 'Segoe UI', Arial, sans-serif;
+             background: #f4f6f9; padding: 40px 20px;">
+    <table cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;
+           background: white; border-radius: 16px; overflow: hidden;
+           box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+        <tr>
+            <td style="background: linear-gradient(135deg, #ef4444, #dc2626);
+                       padding: 40px; text-align: center;">
+                <div style="font-size: 60px; margin-bottom: 12px;">⚠️</div>
+                <h1 style="color: white; margin: 0; font-size: 26px;">Livre en retard</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px;">
+                <p style="font-size: 16px; color: #333; margin: 0 0 20px;">
+                    Bonjour <strong th:text="${nom}">Alice</strong>,
+                </p>
+                <p style="font-size: 16px; color: #555; line-height: 1.6;">
+                    Le livre suivant est <strong>en retard</strong> :
+                </p>
+
+                <div style="background: #fee2e2; border-left: 4px solid #ef4444;
+                            padding: 20px; border-radius: 8px; margin: 24px 0;">
+                    <p style="margin: 0 0 8px; font-size: 15px; color: #991b1b;">
+                        📖 <strong th:text="${livre}">Le Petit Prince</strong>
+                    </p>
+                    <p style="margin: 0 0 8px; font-size: 14px; color: #991b1b;">
+                        Devait être rendu le : <strong th:text="${dateRetour}">15/01/2026</strong>
+                    </p>
+                    <p style="margin: 0; font-size: 14px; color: #991b1b;">
+                        Retard : <strong th:text="${joursRetard}">5</strong> jour(s)
+                    </p>
+                </div>
+
+                <div style="background: #fef3c7; padding: 16px; border-radius: 8px;
+                            text-align: center; margin-bottom: 24px;">
+                    <p style="margin: 0; font-size: 14px; color: #92400e;">
+                        Amende actuelle :
+                        <strong style="font-size: 20px;" th:text="${amende} + ' €'">2.50 €</strong>
+                    </p>
+                </div>
+
+                <p style="font-size: 15px; color: #555;">
+                    Merci de retourner ce livre au plus vite.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background: #f9fafb; padding: 24px; text-align: center;
+                       color: #9ca3af; font-size: 13px;">
+                📚 Bibliothèque Municipale — Système automatique
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

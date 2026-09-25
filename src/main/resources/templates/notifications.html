@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-main fade-in">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">🔔 Notifications</h1>
+            <p class="page-subtitle">
+                <span th:text="${nbNonLues}">0</span> non lue(s)
+            </p>
+        </div>
+        <form th:action="@{/notifications/tout-lire}" method="post">
+            <button type="submit" class="btn btn-secondary">✓ Tout marquer comme lu</button>
+        </form>
+    </div>
+
+    <div class="alert alert-success" th:if="${message}">
+        <span th:text="${message}"></span>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(notifications)}">
+        <div th:each="n : ${notifications}" class="card"
+             style="margin-bottom: 12px; border-left: 4px solid;
+                    opacity: 1;"
+             th:style="'border-left-color: var(--' + ${n.couleur} + ');' + (${n.lue} ? 'opacity: 0.6;' : '')">
+
+            <div style="display: flex; align-items: flex-start; gap: 16px; padding: 20px;">
+
+                <div style="font-size: 32px; flex-shrink: 0;"
+                     th:text="${n.icone}">ℹ️</div>
+
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);"
+                            th:text="${n.titre}">Titre</h3>
+                        <span class="badge"
+                              th:classappend="'badge-' + ${n.couleur}"
+                              th:if="${!n.lue}">Nouveau</span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin: 0 0 8px;"
+                       th:text="${n.message}">Message</p>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <small style="color: var(--text-muted);"
+                               th:text="${#temporals.format(n.dateCreation, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
+                        <span th:if="${n.emailEnvoye}" class="badge badge-success">📧 Email envoyé</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <form th:if="${!n.lue}"
+                          th:action="@{/notifications/{id}/lue(id=${n.id})}"
+                          method="post">
+                        <button type="submit" class="btn btn-secondary btn-sm" title="Marquer comme lu">
+                            ✓
+                        </button>
+                    </form>
+                    <form th:action="@{/notifications/{id}/supprimer(id=${n.id})}"
+                          method="post"
+                          onsubmit="return confirm('Supprimer cette notification ?');">
+                        <button type="submit" class="btn btn-danger btn-icon btn-sm">🗑️</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(notifications)}">
+        <div class="empty-state">
+            <div class="empty-icon">🔔</div>
+            <h3>Aucune notification</h3>
+            <p>Les notifications apparaîtront ici.</p>
+        </div>
+    </div>
+
+</div>
+
+<script th:replace="~{fragments/navbar :: themeScript}"></script>
+</body>
+</html>

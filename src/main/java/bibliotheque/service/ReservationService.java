@@ -23,6 +23,7 @@ public class ReservationService {
 
     @Autowired private ReservationRepository reservationRepo;
     @Autowired private EmpruntRepository empruntRepo;
+    @Autowired private NotificationService notificationService;
 
     // ==================== LECTURE ====================
 
@@ -107,9 +108,13 @@ public class ReservationService {
             prochaine.setStatut("DISPONIBLE");
             prochaine.setDateExpiration(LocalDate.now().plusDays(JOURS_VALIDITE));
             reservationRepo.save(prochaine);
+
+            // Envoyer la notification
+            notificationService.notifierReservationDisponible(prochaine);
+
             log.info("Livre {} disponible pour {}",
-                    livre.getTitre(), prochaine.getUtilisateur().getNom());
-        }
+                livre.getTitre(), prochaine.getUtilisateur().getNom());
+            }
     }
 
     // ==================== SUPPRIMER ====================

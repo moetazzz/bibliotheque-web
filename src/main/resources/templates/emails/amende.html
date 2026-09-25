@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"></head>
+<body style="margin: 0; font-family: 'Segoe UI', Arial, sans-serif;
+             background: #f4f6f9; padding: 40px 20px;">
+    <table cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;
+           background: white; border-radius: 16px; overflow: hidden;
+           box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+        <tr>
+            <td style="background: linear-gradient(135deg, #ef4444, #dc2626);
+                       padding: 40px; text-align: center;">
+                <div style="font-size: 60px; margin-bottom: 12px;">💰</div>
+                <h1 style="color: white; margin: 0; font-size: 26px;">Nouvelle amende</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px;">
+                <p style="font-size: 16px; color: #333;">
+                    Bonjour <strong th:text="${nom}">Alice</strong>,
+                </p>
+                <p style="font-size: 16px; color: #555; line-height: 1.6;">
+                    Une amende a été ajoutée à votre compte :
+                </p>
+
+                <div style="background: #fee2e2; border-left: 4px solid #ef4444;
+                            padding: 20px; border-radius: 8px; margin: 24px 0;">
+                    <p style="margin: 0 0 8px; color: #991b1b;">
+                        📖 Livre : <strong th:text="${livre}">Le Petit Prince</strong>
+                    </p>
+                    <p style="margin: 0; font-size: 22px; color: #991b1b;">
+                        <strong th:text="${montant} + ' €'">2.50 €</strong>
+                    </p>
+                </div>
+
+                <p style="font-size: 15px; color: #555;">
+                    Merci de régulariser votre situation.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background: #f9fafb; padding: 24px; text-align: center;
+                       color: #9ca3af; font-size: 13px;">
+                📚 Bibliothèque Municipale — Système automatique
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

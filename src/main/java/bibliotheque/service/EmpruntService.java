@@ -27,6 +27,8 @@ public class EmpruntService {
     @Autowired private EmpruntRepository empruntRepo;
     @Autowired private AmendeRepository amendeRepo;
     @Autowired private UtilisateurRepository userRepo;
+    @Autowired private NotificationService notificationService;
+        
 
     // ==================== LECTURE ====================
 
@@ -81,12 +83,16 @@ public class EmpruntService {
         empruntRepo.save(emprunt);
 
         long joursRetard = emprunt.joursDeRetard();
-        if (joursRetard > 0) creerAmende(emprunt, joursRetard);
+            if (joursRetard > 0) {
+                creerAmende(emprunt, joursRetard);
+                // Notifier l'amende
+                notificationService.notifierAmende(emprunt.getUtilisateur(),
+                joursRetard * AMENDE_PAR_JOUR, emprunt.getLivre().getTitre());
+                 }
 
-        return emprunt;
-    }
+            return emprunt;}
 
-    public Emprunt prolonger(Long empruntId) {
+        public Emprunt prolonger(Long empruntId) {
         Emprunt emprunt = empruntRepo.findById(empruntId)
                 .orElseThrow(() -> new RuntimeException("Emprunt introuvable"));
 

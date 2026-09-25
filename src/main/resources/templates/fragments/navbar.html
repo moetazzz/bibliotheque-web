@@ -31,6 +31,10 @@
                th:classappend="${active == 'amendes'} ? 'active'">
                 <i>💰</i> Amendes
             </a>
+            <a href="/notifications" class="nav-link"
+                th:classappend="${active == 'notifications'} ? 'active'">
+                <i>🔔</i> Notifications
+            </a>
 
             <!-- Menu Admin dropdown -->
             <div class="dropdown" th:if="${#authorization.expression('hasRole(''BIB'')')}">
