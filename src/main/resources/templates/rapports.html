@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapports PDF</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-main fade-in">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">📄 Rapports PDF</h1>
+            <p class="page-subtitle">Générez et téléchargez des rapports professionnels</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+
+        <a href="/rapports/livres/pdf" style="text-decoration: none; color: inherit;" target="_blank">
+            <div class="stat-card blue" style="cursor: pointer;">
+                <div class="icon-box">📚</div>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">Catalogue des livres</h3>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                    Liste complète de tous les livres de la bibliothèque
+                </p>
+                <div class="btn btn-primary btn-sm" style="width: 100%;">
+                    📥 Télécharger PDF
+                </div>
+            </div>
+        </a>
+
+        <a href="/rapports/utilisateurs/pdf" style="text-decoration: none; color: inherit;" target="_blank">
+            <div class="stat-card green" style="cursor: pointer;">
+                <div class="icon-box">👥</div>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">Utilisateurs</h3>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                    Liste des membres et bibliothécaires
+                </p>
+                <div class="btn btn-success btn-sm" style="width: 100%;">
+                    📥 Télécharger PDF
+                </div>
+            </div>
+        </a>
+
+        <a href="/rapports/emprunts/pdf" style="text-decoration: none; color: inherit;" target="_blank">
+            <div class="stat-card orange" style="cursor: pointer;">
+                <div class="icon-box">📋</div>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">Emprunts en cours</h3>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                    Emprunts actifs et retards
+                </p>
+                <div class="btn btn-warning btn-sm" style="width: 100%;">
+                    📥 Télécharger PDF
+                </div>
+            </div>
+        </a>
+
+        <a href="/rapports/amendes/pdf" style="text-decoration: none; color: inherit;" target="_blank">
+            <div class="stat-card red" style="cursor: pointer;">
+                <div class="icon-box">💰</div>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">Amendes</h3>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                    Amendes impayées et payées
+                </p>
+                <div class="btn btn-danger btn-sm" style="width: 100%;">
+                    📥 Télécharger PDF
+                </div>
+            </div>
+        </a>
+
+    </div>
+
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <h3 class="card-title">ℹ️ À propos des rapports</h3>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8; margin: 0;">
+                Les rapports PDF incluent :
+            </p>
+            <ul style="color: var(--text-secondary); font-size: 14px; line-height: 2; margin-top: 12px;">
+                <li>📅 La date de génération automatique</li>
+                <li>📊 Les statistiques en en-tête</li>
+                <li>🎨 Une mise en page professionnelle avec couleurs</li>
+                <li>📄 Format prêt à imprimer (A4)</li>
+                <li>🔒 Traçabilité : chaque export est enregistré dans le journal d'audit</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<script th:replace="~{fragments/navbar :: themeScript}"></script>
+</body>
+</html>
