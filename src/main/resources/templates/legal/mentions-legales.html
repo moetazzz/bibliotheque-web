@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mentions légales</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container-main" style="max-width: 900px; padding: 60px 24px;">
+    <h1 style="font-size: 32px; margin-bottom: 24px;">Mentions légales</h1>
+
+    <div class="card" style="padding: 32px;">
+        <h2>Éditeur du site</h2>
+        <p><strong>Nom</strong> : [Ton Nom / Ta Société]</p>
+        <p><strong>Adresse</strong> : [Ton Adresse]</p>
+        <p><strong>Email</strong> : contact@bibliotheque-app.com</p>
+        <p><strong>SIRET</strong> : [Numéro SIRET]</p>
+
+        <h2 style="margin-top: 32px;">Hébergement</h2>
+        <p>Ce site est hébergé par Render (render.com).</p>
+
+        <h2 style="margin-top: 32px;">Propriété intellectuelle</h2>
+        <p>L'ensemble du contenu de ce site est la propriété exclusive de [Ton Nom].</p>
+
+        <h2 style="margin-top: 32px;">Données personnelles</h2>
+        <p>Voir notre <a href="/confidentialite">politique de confidentialité</a>.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px;">
+        <a href="/" class="btn btn-primary">← Retour à l'accueil</a>
+    </div>
+</div>
+</body>
+</html>

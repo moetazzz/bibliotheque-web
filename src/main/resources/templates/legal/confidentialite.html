@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Politique de confidentialité</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container-main" style="max-width: 900px; padding: 60px 24px;">
+    <h1 style="font-size: 32px; margin-bottom: 24px;">Politique de confidentialité</h1>
+
+    <div class="card" style="padding: 32px;">
+        <h2>1. Données collectées</h2>
+        <ul>
+            <li><strong>Nom complet</strong></li>
+            <li><strong>Email</strong></li>
+            <li><strong>Mot de passe</strong> (hashé avec BCrypt, jamais lisible)</li>
+            <li><strong>Historique des emprunts</strong></li>
+            <li><strong>Amendes</strong></li>
+        </ul>
+
+        <h2 style="margin-top: 24px;">2. Utilisation des données</h2>
+        <p>Vos données servent uniquement à gérer les emprunts de la bibliothèque.</p>
+
+        <h2 style="margin-top: 24px;">3. Conservation</h2>
+        <p>Conservées pendant la durée d'inscription + 3 ans.</p>
+
+        <h2 style="margin-top: 24px;">4. Vos droits (RGPD)</h2>
+        <p>Vous pouvez demander : accès, rectification, suppression.
+        Contact : dpo@bibliotheque-app.com</p>
+
+        <h2 style="margin-top: 24px;">5. Sécurité</h2>
+        <p>Mot de passe hashé, connexion HTTPS, sauvegardes quotidiennes.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px;">
+        <a href="/" class="btn btn-primary">← Retour à l'accueil</a>
+    </div>
+</div>
+</body>
+</html>

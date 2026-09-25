@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Conditions Générales d'Utilisation</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container-main" style="max-width: 900px; padding: 60px 24px;">
+    <h1 style="font-size: 32px; margin-bottom: 24px;">Conditions Générales d'Utilisation</h1>
+
+    <div class="card" style="padding: 32px;">
+        <h2>1. Objet</h2>
+        <p>Cette application permet la gestion d'une bibliothèque municipale :
+        catalogue de livres, emprunts, réservations, amendes.</p>
+
+        <h2 style="margin-top: 24px;">2. Accès au service</h2>
+        <p>L'accès est réservé aux utilisateurs autorisés. Vos identifiants
+        sont personnels et confidentiels.</p>
+
+        <h2 style="margin-top: 24px;">3. Règles d'utilisation</h2>
+        <ul>
+            <li>Respecter les durées d'emprunt (14 jours)</li>
+            <li>Retourner les livres dans les délais</li>
+            <li>Régler les amendes de retard (0,50€/jour)</li>
+            <li>Ne pas tenter de contourner la sécurité</li>
+        </ul>
+
+        <h2 style="margin-top: 24px;">4. Amendes</h2>
+        <p>0,50€ par jour de retard. Blocage d'emprunt à partir de 10€ d'amendes impayées.</p>
+
+        <h2 style="margin-top: 24px;">5. Responsabilité</h2>
+        <p>L'utilisateur est responsable de ses emprunts.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px;">
+        <a href="/" class="btn btn-primary">← Retour à l'accueil</a>
+    </div>
+</div>
+</body>
+</html>

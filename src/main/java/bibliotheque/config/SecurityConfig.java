@@ -26,10 +26,19 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .userDetailsService(userDetailsService)
-
+            
+            .headers(headers -> headers
+            .httpStrictTransportSecurity(hsts -> hsts
+            .includeSubDomains(true)
+            .maxAgeInSeconds(31536000)
+            )
+            .frameOptions(frame -> frame.sameOrigin())
+            )
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC =====
                 .requestMatchers("/login", "/403", "/css/**", "/js/**", "/images/**", "/favicon.ico")
+                    .permitAll()
+                .requestMatchers("/mentions-legales", "/cgu", "/confidentialite")
                     .permitAll()
 
                 // ===== ADMIN UNIQUEMENT =====
