@@ -1,5 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="Application de gestion de bibliothèque">
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Bibliothèque">
+</head>
 <body>
 
 <!-- FRAGMENT : Navbar réutilisable -->
@@ -31,12 +45,7 @@
                th:classappend="${active == 'amendes'} ? 'active'">
                 <i>💰</i> Amendes
             </a>
-            <a href="/notifications" class="nav-link"
-                th:classappend="${active == 'notifications'} ? 'active'">
-                <i>🔔</i> Notifications
-            </a>
 
-            <!-- Menu Admin dropdown -->
             <div class="dropdown" th:if="${#authorization.expression('hasRole(''BIB'')')}">
                 <button class="nav-link dropdown-toggle">
                     <i>⚙️</i> Admin
@@ -66,7 +75,46 @@
     </div>
 </nav>
 
-<!-- FRAGMENT : Script thème -->
+<!-- FRAGMENT : Footer -->
+<footer th:fragment="footer" style="background: var(--bg-card); border-top: 1px solid var(--border);
+        padding: 24px; text-align: center; margin-top: 60px; color: var(--text-secondary);
+        font-size: 13px;">
+    <div style="max-width: 1320px; margin: 0 auto;">
+        <p style="margin-bottom: 8px;">
+            📚 Bibliothèque Municipale — © <span th:text="${#temporals.year(#temporals.createNow())}">2026</span>
+        </p>
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <a href="/mentions-legales" style="color: inherit;">Mentions légales</a>
+            <a href="/cgu" style="color: inherit;">CGU</a>
+            <a href="/confidentialite" style="color: inherit;">Confidentialité</a>
+        </div>
+    </div>
+</footer>
+
+<!-- FRAGMENT : Scripts communs -->
+<th:block th:fragment="scripts">
+    <script th:src="@{/js/pwa-register.js}"></script>
+    <script>
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const newTheme = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+    (function() {
+        const saved = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.querySelector('.theme-toggle');
+            if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+        });
+    })();
+    </script>
+</th:block>
+
+<!-- FRAGMENT : Script thème (compatibilité) -->
 <script th:fragment="themeScript">
 function toggleTheme() {
     const html = document.documentElement;
@@ -85,19 +133,6 @@ function toggleTheme() {
     });
 })();
 </script>
-<footer th:fragment="footer" style="background: var(--bg-card); border-top: 1px solid var(--border);
-        padding: 24px; text-align: center; margin-top: 60px; color: var(--text-secondary);
-        font-size: 13px;">
-    <div style="max-width: 1320px; margin: 0 auto;">
-        <p style="margin-bottom: 8px;">
-            📚 Bibliothèque Municipale — © <span th:text="${#temporals.year(#temporals.createNow())}">2026</span>
-        </p>
-        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-            <a href="/mentions-legales" style="color: inherit;">Mentions légales</a>
-            <a href="/cgu" style="color: inherit;">CGU</a>
-            <a href="/confidentialite" style="color: inherit;">Confidentialité</a>
-        </div>
-    </div>
-</footer>
+
 </body>
 </html>
