@@ -61,10 +61,12 @@
 
         <div class="navbar-right">
             <button class="theme-toggle" onclick="toggleTheme()" title="Mode sombre/clair">🌙</button>
+            <button class="navbar-burger" onclick="toggleMobileMenu()" 
+                title="Menu" aria-label="Ouvrir le menu">☰</button>
             <a href="/profil" class="user-badge" style="text-decoration: none; cursor: pointer;"
                title="Mon profil">
-                <div class="avatar" th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</div>
-                <span th:text="${#authentication.name}">admin@biblio.com</span>
+               <div class="avatar" th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</div>
+               <span th:text="${#authentication.name}">admin@biblio.com</span>
             </a>
             <form th:action="@{/logout}" method="post" style="display:inline;">
                 <button type="submit" class="nav-link btn-logout">
@@ -111,7 +113,32 @@
                 if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
             });
         })();
+                // ==================== MENU BURGER (mobile) ====================
+        function toggleMobileMenu() {
+            const burger = document.querySelector('.navbar-burger');
+            const nav = document.querySelector('.navbar-nav');
+            if (!burger || !nav) return;
+
+            burger.classList.toggle('open');
+            nav.classList.toggle('open');
+            burger.textContent = burger.classList.contains('open') ? '✕' : '☰';
+        }
+
+        // Fermer le menu si on clique ailleurs
+        document.addEventListener('click', function(e) {
+            const burger = document.querySelector('.navbar-burger');
+            const nav = document.querySelector('.navbar-nav');
+            if (!burger || !nav) return;
+            if (nav.classList.contains('open')
+                && !nav.contains(e.target)
+                && !burger.contains(e.target)) {
+                burger.classList.remove('open');
+                nav.classList.remove('open');
+                burger.textContent = '☰';
+            }
+        });
     </script>
+    
 </th:block>
 
 </body>

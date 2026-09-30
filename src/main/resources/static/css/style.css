@@ -685,11 +685,108 @@ a { text-decoration: none; }
 }
 
 /* ==========================================================
-   RESPONSIVE
+   BURGER MENU (mobile)
    ========================================================== */
+.navbar-burger {
+    display: none;              /* caché sur desktop */
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: white;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transition: var(--transition);
+}
+
+.navbar-burger:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.navbar-burger.open {
+    background: var(--primary);
+    box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+}
+
 @media (max-width: 768px) {
-    .navbar .container { padding: 0 16px; }
-    .navbar-nav { display: none; }
+    .navbar .container {
+        padding: 0 16px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    /* Le burger devient visible */
+    .navbar-burger {
+        display: flex;
+    }
+
+    /* Le menu devient un dropdown */
+    .navbar-nav {
+        display: none;
+        order: 3;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        padding: 12px 0 4px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        margin-top: 4px;
+    }
+
+    .navbar-nav.open {
+        display: flex;
+        animation: slideDown 0.25s ease;
+    }
+
+    .navbar-nav .nav-link {
+        justify-content: flex-start;
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+
+    /* Sous-menu admin en mobile */
+    .navbar-nav .dropdown {
+        width: 100%;
+    }
+
+    .navbar-nav .dropdown-toggle {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .navbar-nav .dropdown-menu {
+        position: static;
+        display: block !important;
+        box-shadow: none;
+        border: none;
+        background: rgba(255,255,255,0.04);
+        margin-top: 4px;
+        animation: none;
+    }
+
+    .navbar-nav .dropdown-item {
+        padding: 10px 16px;
+        color: rgba(255,255,255,0.85);
+    }
+
+    .navbar-nav .dropdown-item:hover {
+        background: rgba(255,255,255,0.08);
+        color: white;
+    }
+
+    /* Cacher le badge user en mobile pour gagner de la place */
+    .navbar-right .user-badge span {
+        display: none;
+    }
+
+    .navbar-right .user-badge {
+        padding: 6px 8px;
+    }
+
+    /* Reste du responsive */
     .container-main { padding: 20px 16px; }
     .page-title { font-size: 24px; }
     .stat-card .stat-value { font-size: 28px; }
