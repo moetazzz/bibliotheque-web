@@ -61,12 +61,16 @@
 
         <div class="navbar-right">
             <button class="theme-toggle" onclick="toggleTheme()" title="Mode sombre/clair">🌙</button>
+            <a href="/notifications" class="theme-toggle" 
+                title="Notifications" style="position: relative; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                🔔
+            </a>
             <button class="navbar-burger" onclick="toggleMobileMenu()" 
                 title="Menu" aria-label="Ouvrir le menu">☰</button>
             <a href="/profil" class="user-badge" style="text-decoration: none; cursor: pointer;"
-               title="Mon profil">
-               <div class="avatar" th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</div>
-               <span th:text="${#authentication.name}">admin@biblio.com</span>
+                title="Mon profil">
+                <div class="avatar" th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</div>
+                <span th:text="${#authentication.name}">admin@biblio.com</span>
             </a>
             <form th:action="@{/logout}" method="post" style="display:inline;">
                 <button type="submit" class="nav-link btn-logout">
