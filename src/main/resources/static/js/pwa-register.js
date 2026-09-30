@@ -21,14 +21,22 @@
     // ==================== BANNIÈRE D'INSTALLATION ====================
     let deferredPrompt = null;
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        // Empêcher la bannière par défaut
-        e.preventDefault();
-        // Sauvegarder l'événement pour plus tard
-        deferredPrompt = e;
-        // Afficher notre bannière custom
-        afficherBanniereInstallation();
-    });
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Empêcher la bannière par défaut
+    e.preventDefault();
+    // Sauvegarder l'événement pour plus tard
+    deferredPrompt = e;
+
+    // ✅ NE PAS afficher si l'app est déjà installée (mode standalone)
+    if (window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true) {
+        console.log('📱 App déjà installée — bannière désactivée');
+        return;
+    }
+
+    // Afficher notre bannière custom
+    afficherBanniereInstallation();
+});
 
     function afficherBanniereInstallation() {
         // Éviter les doublons
