@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .requestMatchers("/livres/nouveau", "/livres/*/modifier", "/livres/*/supprimer")
                     .hasRole("BIB")
                 .requestMatchers("/emprunts/nouveau").hasRole("BIB")
+                .requestMatchers("/rapports/**").hasRole("BIB")
 
                 // ===== CONNECTÉ =====
                 .anyRequest().authenticated()
