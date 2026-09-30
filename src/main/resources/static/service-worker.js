@@ -3,13 +3,15 @@
 // Cache les ressources pour un fonctionnement hors-ligne
 // ==========================================================
 
-const CACHE_NAME = 'biblio-cache-v1';
+const CACHE_NAME = 'biblio-cache-v2'; // <-- Version incrémentée (v1 → v2)
 const OFFLINE_URL = '/offline';
 
 // Ressources à mettre en cache dès l'installation
 const PRECACHE_URLS = [
     '/',
+    '/offline',
     '/css/style.css',
+    '/js/pwa-register.js',
     '/manifest.json',
     '/icons/icon-192.png',
     '/icons/icon-512.png'
@@ -50,15 +52,39 @@ self.addEventListener('fetch', event => {
     // Ignorer les requêtes non-GET
     if (event.request.method !== 'GET') return;
 
-    // Ignorer les requêtes API POST/PUT/DELETE
     const url = new URL(event.request.url);
+
+    // Ignorer les requêtes API
     if (url.pathname.startsWith('/api/')) return;
 
-    // Stratégie : Network First, fallback Cache
+    // Ignorer les requêtes externes (Google Fonts, CDN, etc.)
+    if (url.origin !== self.location.origin) return;
+
+    // ===== STRATÉGIE CACHE FIRST pour les fichiers statiques =====
+    if (url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|woff2?|ico)$/)) {
+        event.respondWith(
+            caches.match(event.request).then(cachedResponse => {
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+                return fetch(event.request).then(response => {
+                    if (response.status === 200) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
+                    return response;
+                });
+            })
+        );
+        return;
+    }
+
+    // ===== STRATÉGIE NETWORK FIRST pour le HTML =====
     event.respondWith(
         fetch(event.request)
             .then(response => {
-                // Mettre en cache la réponse fraîche
                 if (response.status === 200) {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then(cache => {
@@ -68,12 +94,10 @@ self.addEventListener('fetch', event => {
                 return response;
             })
             .catch(() => {
-                // Pas de réseau → essayer le cache
                 return caches.match(event.request).then(cachedResponse => {
                     if (cachedResponse) {
                         return cachedResponse;
                     }
-                    // Si rien dans le cache → page d'erreur
                     return caches.match(OFFLINE_URL);
                 });
             })

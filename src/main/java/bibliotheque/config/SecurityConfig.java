@@ -36,8 +36,10 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC =====
-                .requestMatchers("/login", "/403", "/css/**", "/js/**", "/images/**", "/icons/**",
-                    "/manifest.json", "/service-worker.js", "/favicon.ico")
+                .requestMatchers("/login", "/403", "/css/**", "/js/**", "/images/**",
+                    "/icons/**", "/screenshots/**",
+                    "/manifest.json", "/service-worker.js", "/favicon.ico",
+                    "/offline") // <-- AJOUT : route /offline + /screenshots
                         .permitAll()
                 .requestMatchers("/mentions-legales", "/cgu", "/confidentialite")
                     .permitAll()

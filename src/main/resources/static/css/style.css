@@ -750,6 +750,7 @@ a { text-decoration: none; }
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
 /* ==========================================================
    FORMULAIRE MODERNE
    ========================================================== */
@@ -947,6 +948,7 @@ a { text-decoration: none; }
     .login-left .features { display: none; }
     .login-right { padding: 40px 20px; }
 }
+
 /* ==========================================================
    FILTRES AVANCÉS
    ========================================================== */
@@ -1077,9 +1079,10 @@ a { text-decoration: none; }
     color: var(--text-primary);
     cursor: pointer;
     font-size: 13px;
+}   /* <-- ACCOLADE AJOUTÉE ICI */
 
-    /* ==========================================================
-PWA INSTALL BANNER
+/* ==========================================================
+   PWA INSTALL BANNER
    ========================================================== */
 .pwa-banner {
     position: fixed;
@@ -1180,4 +1183,4 @@ PWA INSTALL BANNER
         font-size: 11px;
     }
 }
-}
+/* <-- ACCOLADE EN TROP SUPPRIMÉE ICI */

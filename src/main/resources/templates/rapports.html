@@ -4,6 +4,11 @@
     <title>Bibliothèque</title>
     <th:block th:replace="~{fragments/navbar :: head}"></th:block>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- AJOUTEZ CES LIGNES POUR LA PWA -->
+    <link rel="manifest" th:href="@{/manifest.json}">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 
@@ -95,5 +100,6 @@
 </div>
 <div th:replace="~{fragments/navbar :: footer}"></div>
 <script th:replace="~{fragments/navbar :: themeScript}"></script>
+<script th:src="@{/js/pwa-register.js}"></script>
 </body>
 </html>

@@ -91,48 +91,28 @@
     </div>
 </footer>
 
-<!-- FRAGMENT : Scripts communs -->
-<th:block th:fragment="scripts">
+<!-- FRAGMENT : Script thème + PWA (compatibilité) -->
+<th:block th:fragment="themeScript">
     <script th:src="@{/js/pwa-register.js}"></script>
-    <script>
-    function toggleTheme() {
-        const html = document.documentElement;
-        const current = html.getAttribute('data-theme');
-        const newTheme = current === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-    }
-    (function() {
-        const saved = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', saved);
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.querySelector('.theme-toggle');
-            if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
-        });
-    })();
+    <script th:inline="javascript">
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+        (function() {
+            const saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.querySelector('.theme-toggle');
+                if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+            });
+        })();
     </script>
 </th:block>
-
-<!-- FRAGMENT : Script thème (compatibilité) -->
-<script th:fragment="themeScript">
-function toggleTheme() {
-    const html = document.documentElement;
-    const current = html.getAttribute('data-theme');
-    const newTheme = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-}
-(function() {
-    const saved = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', saved);
-    document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.querySelector('.theme-toggle');
-        if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
-    });
-})();
-</script>
 
 </body>
 </html>
