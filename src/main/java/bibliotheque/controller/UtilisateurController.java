@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.Authentication;
 
 @Controller
 @RequestMapping("/utilisateurs")
@@ -90,14 +91,40 @@ public class UtilisateurController {
     }
 
     @PostMapping("/{id}/supprimer")
-    public String supprimer(@PathVariable Long id, RedirectAttributes redirectAttrs) {
-        Utilisateur u = userService.trouverParId(id);
-        String nom = u != null ? u.getNom() : "?";
-        userService.supprimer(id);
-
-        auditService.enregistrer(nom, id, "SUPPR_USER", "Suppression : " + nom);
-
-        redirectAttrs.addFlashAttribute("message", "Utilisateur supprimé avec succès !");
+    public String supprimer(@PathVariable Long id,Authentication auth,
+    RedirectAttributes redirectAttrs) {
+    Utilisateur u = userService.trouverParId(id);
+    if (u == null) {
+        redirectAttrs.addFlashAttribute("erreur", "Utilisateur introuvable");
         return "redirect:/utilisateurs";
     }
+
+    // 🔒 Protection 1 : ne pas se supprimer soi-même
+    if (u.getEmail().equals(auth.getName())) {
+        redirectAttrs.addFlashAttribute("erreur",
+            "❌ Vous ne pouvez pas supprimer votre propre compte");
+        return "redirect:/utilisateurs";
+    }
+
+    // 🔒 Protection 2 : ne pas supprimer le dernier bibliothécaire
+    if ("BIB".equals(u.getRole())) {
+        long nbBib = userService.getTousLesUtilisateurs().stream()
+            .filter(x -> "BIB".equals(x.getRole()))
+            .count();
+        if (nbBib <= 1) {
+            redirectAttrs.addFlashAttribute("erreur",
+                "❌ Impossible de supprimer le dernier bibliothécaire");
+            return "redirect:/utilisateurs";
+        }
+    }
+
+    String nom = u.getNom();
+    userService.supprimer(id);
+
+    auditService.enregistrer(auth.getName(), null, "SUPPR_USER",
+            "Suppression : " + nom);
+
+    redirectAttrs.addFlashAttribute("message", "Utilisateur supprimé avec succès !");
+    return "redirect:/utilisateurs";
+}
 }
