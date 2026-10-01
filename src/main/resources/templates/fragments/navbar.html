@@ -61,9 +61,11 @@
 
         <div class="navbar-right">
             <button class="theme-toggle" onclick="toggleTheme()" title="Mode sombre/clair">🌙</button>
-            <a href="/notifications" class="theme-toggle" 
-                title="Notifications" style="position: relative; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+            <a href="/notifications" class="theme-toggle notif-bell" title="Notifications">
                 🔔
+                <span class="notif-badge" 
+                    th:if="${nbNotificationsNonLues != null and nbNotificationsNonLues > 0}"
+                    th:text="${nbNotificationsNonLues > 9 ? '9+' : nbNotificationsNonLues}">3</span>
             </a>
             <button class="navbar-burger" onclick="toggleMobileMenu()" 
                 title="Menu" aria-label="Ouvrir le menu">☰</button>

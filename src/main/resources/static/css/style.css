@@ -1281,3 +1281,40 @@ a { text-decoration: none; }
     }
 }
 /* <-- ACCOLADE EN TROP SUPPRIMÉE ICI */
+
+/* ==========================================================
+   BADGE NOTIFICATIONS (navbar)
+   ========================================================== */
+.notif-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-sidebar);
+    line-height: 1;
+    box-shadow: 0 2px 4px rgba(239,68,68,0.4);
+    animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
