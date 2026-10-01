@@ -29,6 +29,9 @@
     <div class="alert alert-success" th:if="${message}">
         ✅ <span th:text="${message}"></span>
     </div>
+    <div class="alert alert-danger" th:if="${erreur}">
+        ❌ <span th:text="${erreur}"></span>
+    </div>
 
     <!-- FILTRES -->
     <form method="get" class="filters-panel">
