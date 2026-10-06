@@ -1,6 +1,5 @@
 package bibliotheque.ai;
 
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,19 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/test-ai")
 public class TestAiController {
 
-    private final ChatClient chatClient;
+    private final AssistantService assistantService;
 
-    public TestAiController(ChatClient.Builder builder, BibliothequeTools tools) {
-        this.chatClient = builder
-                .defaultTools(tools)   // 👈 Enregistre les outils
-                .build();
+    public TestAiController(AssistantService assistantService) {
+        this.assistantService = assistantService;
     }
 
     @GetMapping("/bonjour")
     public String bonjour(@RequestParam(defaultValue = "Bonjour, qui es-tu ?") String message) {
-        return chatClient.prompt()
-                .user(message)
-                .call()
-                .content();
+        return assistantService.chat(message);
     }
 }
