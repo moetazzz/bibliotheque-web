@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/403", "/css/**", "/js/**", "/images/**",
                     "/icons/**", "/screenshots/**",
                     "/manifest.json", "/service-worker.js", "/favicon.ico",
-                    "/offline") // <-- AJOUT : route /offline + /screenshots
+                    "/offline", "/api/test-ai/**") // <-- AJOUT : route /offline + /screenshots
                         .permitAll()
                 .requestMatchers("/mentions-legales", "/cgu", "/confidentialite")
                     .permitAll()

@@ -12,3 +12,9 @@ target/
 .classpath
 .project
 .settings/
+
+
+# Secrets / clés API
+.env
+application-local.properties
+application-secret.properties

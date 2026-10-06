@@ -6,6 +6,10 @@
     <meta name="theme-color" content="#6366f1">
     <meta name="description" content="Application de gestion de bibliothèque">
 
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
@@ -101,6 +105,7 @@
 
 <!-- FRAGMENT : Script thème + PWA (compatibilité) -->
 <th:block th:fragment="themeScript">
+    <script th:src="@{/js/assistant.js}"></script>
     <script th:src="@{/js/pwa-register.js}"></script>
     <script th:inline="javascript">
         function toggleTheme() {
