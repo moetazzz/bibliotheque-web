@@ -66,9 +66,26 @@ public class AssistantService {
      * @param message Le message de l'utilisateur
      * @return La réponse de l'assistant
      */
+        /**
+     * Envoie un message simple (sans mémoire spécifique).
+     * Utilisé pour les tests rapides.
+     */
     public String chat(String message) {
+        return chat(message, "default");
+    }
+
+    /**
+     * Envoie un message avec un identifiant de conversation.
+     * Permet d'avoir une mémoire séparée par utilisateur.
+     *
+     * @param message Le message de l'utilisateur
+     * @param conversationId Identifiant unique de la conversation (ex: email)
+     * @return La réponse de l'assistant
+     */
+    public String chat(String message, String conversationId) {
         return chatClient.prompt()
                 .user(message)
+                .advisors(a -> a.param("chat_memory_conversation_id", conversationId))
                 .call()
                 .content();
     }
