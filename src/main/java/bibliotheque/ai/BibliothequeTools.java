@@ -1,5 +1,12 @@
 package bibliotheque.ai;
 
+import bibliotheque.service.AuditService;
+import bibliotheque.service.EmpruntService;
+import bibliotheque.service.UtilisateurService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
+
 import bibliotheque.modele.Emprunt;
 import bibliotheque.modele.Livre;
 import bibliotheque.repository.EmpruntRepository;
@@ -19,12 +26,21 @@ public class BibliothequeTools {
 
     private final LivreRepository livreRepo;
     private final EmpruntRepository empruntRepo;
+    private final EmpruntService empruntService;
+    private final UtilisateurService userService;
+    private final AuditService auditService;
 
-    public BibliothequeTools(LivreRepository livreRepo, EmpruntRepository empruntRepo) {
+    public BibliothequeTools(LivreRepository livreRepo,
+                            EmpruntRepository empruntRepo,
+                            EmpruntService empruntService,
+                            UtilisateurService userService,
+                            AuditService auditService) {
         this.livreRepo = livreRepo;
         this.empruntRepo = empruntRepo;
+        this.empruntService = empruntService;
+        this.userService = userService;
+        this.auditService = auditService;
     }
-
     // ==================== RECHERCHE DE LIVRES ====================
 
     @Tool(description = """
@@ -108,5 +124,116 @@ public class BibliothequeTools {
         """)
     public List<Emprunt> listerEmpruntsEnCours() {
         return empruntRepo.findByDateRetourEffectiveIsNullOrderByDateRetourPrevueAsc();
+    }
+        // ==================== ACTIONS : PROLONGATION ====================
+
+    @Tool(description = """
+        Vérifie si un emprunt peut être prolongé (sans l'exécuter).
+        Utilise TOUJOURS cet outil en PREMIER quand l'utilisateur demande de prolonger un emprunt.
+        Ensuite, tu dois DEMANDER CONFIRMATION à l'utilisateur avant d'appeler executerProlongation.
+        Retourne les détails de l'emprunt et si la prolongation est possible ou non.
+        """)
+    public String verifierProlongation(
+            @ToolParam(description = "L'identifiant de l'emprunt à prolonger")
+            Long idEmprunt) {
+
+        // 1. Vérifier que l'utilisateur est bien BIB
+        String email = getUtilisateurConnecte();
+        if (email == null) {
+            return "⚠️ Action impossible : utilisateur non connecté.";
+        }
+
+        var utilisateur = userService.trouverParEmail(email);
+        if (utilisateur == null || !"BIB".equals(utilisateur.getRole())) {
+            return "⛔ Action réservée aux bibliothécaires. Vous n'avez pas les droits nécessaires.";
+        }
+
+        // 2. Récupérer l'emprunt
+        var emprunt = empruntService.trouverParId(idEmprunt);
+        if (emprunt == null) {
+            return "❌ Emprunt #" + idEmprunt + " introuvable.";
+        }
+
+        // 3. Vérifications métier
+        if (emprunt.estRendu()) {
+            return "❌ Cet emprunt a déjà été retourné. Aucune prolongation possible.";
+        }
+        if (emprunt.getProlongations() >= 1) {
+            return "❌ Maximum de prolongations atteint (1 seule autorisée).";
+        }
+
+        // 4. Tout est OK → on décrit l'action à confirmer
+        return String.format(
+            "✅ L'emprunt #%d peut être prolongé de 7 jours.%n" +
+            "📖 Livre : %s%n" +
+            "👤 Emprunteur : %s%n" +
+            "📅 Retour actuel : %s → nouveau retour : %s%n" +
+            "⚠️ Demande à l'utilisateur de confirmer avant d'exécuter.",
+            emprunt.getId(),
+            emprunt.getLivre().getTitre(),
+            emprunt.getUtilisateur().getNom(),
+            emprunt.getDateRetourPrevue(),
+            emprunt.getDateRetourPrevue().plusDays(7)
+        );
+    }
+
+    @Tool(description = """
+        Exécute la prolongation d'un emprunt de 7 jours.
+        ATTENTION : N'appelle cet outil QU'APRÈS avoir appelé verifierProlongation
+        ET reçu une confirmation explicite de l'utilisateur (par "oui", "ok", "confirme"...).
+        Si l'utilisateur n'a pas clairement confirmé, ne pas appeler cet outil.
+        """)
+    @Transactional
+    public String executerProlongation(
+            @ToolParam(description = "L'identifiant de l'emprunt à prolonger")
+            Long idEmprunt) {
+
+        // 1. Vérifier le rôle
+        String email = getUtilisateurConnecte();
+        if (email == null) {
+            return "⚠️ Action impossible : utilisateur non connecté.";
+        }
+
+        var utilisateur = userService.trouverParEmail(email);
+        if (utilisateur == null || !"BIB".equals(utilisateur.getRole())) {
+            return "⛔ Prolongation refusée : droits insuffisants.";
+        }
+
+        // 2. Exécuter
+        try {
+            var emprunt = empruntService.prolonger(idEmprunt);
+
+            // 3. Journal d'audit
+            auditService.enregistrer(
+                utilisateur.getNom(),
+                utilisateur.getId(),
+                "PROLONGATION_IA",
+                "Via assistant IA — Emprunt #" + idEmprunt
+                + " (livre : " + emprunt.getLivre().getTitre() + ")"
+            );
+
+            // 4. Message de succès
+            return String.format(
+                "✅ Prolongation effectuée avec succès !%n" +
+                "📖 Livre : %s%n" +
+                "📅 Nouvelle date de retour : %s",
+                emprunt.getLivre().getTitre(),
+                emprunt.getDateRetourPrevue()
+            );
+
+        } catch (Exception e) {
+            return "❌ Erreur lors de la prolongation : " + e.getMessage();
+        }
+    }
+
+    // ==================== UTILITAIRE ====================
+
+    private String getUtilisateurConnecte() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()
+            || "anonymousUser".equals(auth.getName())) {
+            return null;
+        }
+        return auth.getName();
     }
 }
