@@ -12,8 +12,10 @@ public class TestAiController {
 
     private final ChatClient chatClient;
 
-    public TestAiController(ChatClient.Builder builder) {
-        this.chatClient = builder.build();
+    public TestAiController(ChatClient.Builder builder, BibliothequeTools tools) {
+        this.chatClient = builder
+                .defaultTools(tools)   // 👈 Enregistre les outils
+                .build();
     }
 
     @GetMapping("/bonjour")
